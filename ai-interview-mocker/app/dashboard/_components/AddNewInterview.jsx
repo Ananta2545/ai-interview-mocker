@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState } from "react";
 import {
   Dialog,
@@ -11,16 +10,44 @@ import {
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
+import { LoaderCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const AddNewInterview = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [jobPosition, setJobPosition] = useState();
   const [jobDesc, setJobDesc] = useState();
   const [jobExperiance, setJobExperiance] = useState();
+  const [loading, setLoading] = useState(false);
 
-  const onSubmit = (e) => {
+  const router = useRouter();
+
+
+  const onSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
-    console.log(jobPosition, jobDesc, jobExperiance);
+    try{
+        const res = await fetch("/api/gemini", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({jobPosition, jobDesc, jobExperiance}),
+        })
+
+        if(!res.ok){
+            const errorData = await res.json();
+            console.error("Backend error:", errorData.error);
+            return;
+        }
+        
+
+        const data = await res.json();
+        // console.log("Saved interview in DB:", data.savedInterview);
+        setOpenDialog(false);
+        setLoading(false);
+        router.push('/dashboard/interview'+ data.savedInterview[0]?.mockId)
+    }catch(error){
+        console.log("Error: ", error);
+    }
   }
 
   return (
@@ -104,8 +131,12 @@ const AddNewInterview = () => {
                     >
                         Cancel
                     </Button>
-                    <Button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white transition-all duration-300 cursor-pointer">
-                        Start Interview
+                    <Button type="submit" disabled={loading} className="bg-purple-600 hover:bg-purple-700 text-white transition-all duration-300 cursor-pointer">
+                        {loading? 
+                        <>
+                        <LoaderCircle className="animate-spin"/>Generating from AI
+                        </>:'Start Interview'
+                        }
                     </Button>
                     </div>
                 </div>
