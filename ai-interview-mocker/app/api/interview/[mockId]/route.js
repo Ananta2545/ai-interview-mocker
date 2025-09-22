@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 
 export async function GET(req, context){
     try{
-        const {mockId} = context.params;
+        const {mockId} = context?.params;
 
         const interview = await db.select().from(mockInterview).where(eq(mockInterview.mockId, mockId));
         if(!interview){

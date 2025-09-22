@@ -13,3 +13,4 @@ export const mockInterview = pgTable("mockInterview", {
 });
 
 
+

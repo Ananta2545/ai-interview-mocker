@@ -44,7 +44,7 @@ const AddNewInterview = () => {
         // console.log("Saved interview in DB:", data.savedInterview);
         setOpenDialog(false);
         setLoading(false);
-        router.push('/dashboard/interview'+ data.savedInterview[0]?.mockId)
+        router.push('/dashboard/interview/'+ data.savedInterview[0]?.mockId)
     }catch(error){
         console.log("Error: ", error);
     }
