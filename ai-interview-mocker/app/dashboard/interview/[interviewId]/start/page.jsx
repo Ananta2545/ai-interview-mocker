@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import QuestionSection from './_components/QuestionSection';
 import RecordAnswerSection from './_components/RecordAnswerSection';
 import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 const StartInterview = ({params}) => {
     const [loading, setLoading] = useState(true);
@@ -10,6 +11,9 @@ const StartInterview = ({params}) => {
     const [mockInterviewQuestion, setMockInterviewQuestion] = useState()
     const [interviewData, setInterviewData] = useState();
     const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
+    const [evaluating, setEvaluating] = useState(false);
+
+    const router = useRouter();
 
     useEffect(() => {
         const fetchInterview = async () => {
@@ -42,10 +46,26 @@ const StartInterview = ({params}) => {
                 return prevIndex + 1;
             }else{
                 toast.success("You completed all the questions");
+                setEvaluating(true);
+                setTimeout(() => {
+                  router.push(`/dashboard/interview/${interviewData?.id}/feedback`);
+                }, 2000); 
                 return prevIndex;
             }
         })
       }
+
+      if (evaluating) {
+        return (
+          <div className="flex flex-col items-center justify-center h-screen">
+            <div className="loader mb-4"></div>
+            <p className="text-lg font-semibold text-gray-700">
+              Evaluating your answers...
+            </p>
+          </div>
+        );
+      }
+
 
   return (
     <div>

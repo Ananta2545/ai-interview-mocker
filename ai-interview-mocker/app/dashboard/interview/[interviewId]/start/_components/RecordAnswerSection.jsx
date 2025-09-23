@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "../../../../../../components/ui/button.jsx";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import toast from "react-hot-toast";
@@ -9,6 +9,9 @@ import toast from "react-hot-toast";
 const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuestionIndex }) => {
   const [saving, setSaving] = useState(false);
   const [time, setTime] = useState(10);
+  const timerRef = useRef(null);
+  const [isListening, setIsListening] = useState(false);
+  const [answers, setAnswers] = useState([]);
 
   const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
 
@@ -20,27 +23,26 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
     );
   }
 
-  // Auto-save when listening stops
 useEffect(() => {
-  if (!listening && transcript.trim() !== "") {
+  if (!isListening && transcript.trim() !== "") {
     const timer = setTimeout(() => {
       handleSave();
-    }, 500); // 500ms delay to flush final transcript
+    }, 500);
     return () => clearTimeout(timer);
   }
-}, [listening, transcript]);
+}, [isListening, transcript]);
 
 
   // Timer logic
 useEffect(() => {
-  if (!listening) return;
+  if (!isListening) return;
 
   setTime(10); // reset timer on start
-  let autoSaved = false; // <-- track if auto-save has happened
-  const timerId = setInterval(() => {
+  clearInterval(timerRef.current);
+  timerRef.current = setInterval(() => {
     setTime(prev => {
       if (prev <= 1) {
-        clearInterval(timerId);
+        clearInterval(timerRef.current);
         handleStop();
         return 0;
       }
@@ -48,8 +50,8 @@ useEffect(() => {
     });
   }, 1000);
 
-  return () => clearInterval(timerId);
-}, [listening]);
+  return () => clearInterval(timerRef.current);
+}, [isListening]);
 
 
   const formatTime = sec => {
@@ -60,10 +62,13 @@ useEffect(() => {
 
   const handleStart = () => {
     SpeechRecognition.startListening({ continuous: true, interimResults: true, language: "en-IN" });
+    setIsListening(true);
   };
 
   const handleStop = () => {
     SpeechRecognition.stopListening();
+    clearInterval(timerRef.current);
+    setIsListening(false);
     // setTimeout(() => {
     //   console.log("Final transcript:", transcript);
     // }, 1000);
@@ -72,15 +77,59 @@ useEffect(() => {
   const handleSave = async () => {
     // if (!transcript || transcript.trim() === "") return;
     setSaving(true);
+    clearInterval(timerRef.current);
 
-    console.log("Transcript:", transcript);
+    if (!transcript || transcript.trim() === "") {
+      toast.error("No speech detected. Please try speaking before saving.");
+      setSaving(false);
+      return;
+    }
+
+    console.log("=== DEBUG VALUES ===");
+    console.log("transcript:", transcript);
+    console.log("interviewId:", interviewId); 
+    console.log("activeQuestionIndex:", activeQuestionIndex);
+    console.log("transcript length:", transcript?.length || 0);
+    console.log("==================");
     try {
-       const payload = {
+      const correctionResponse = await fetch("/api/correct", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ 
+          transcribedText: transcript || "",
+          interviewId: interviewId,
+          questionId: `${activeQuestionIndex}` // or however you generate question IDs
+        }),
+      });
+      const correctionData = await correctionResponse.json();
+
+      if (!correctionData.success) {
+        throw new Error(correctionData.error || "Failed to correct spelling");
+      }
+
+      const correctedTranscript = correctionData.correctedText;
+
+       const currentAnswer = {
+        questionIndex: activeQuestionIndex,
+        // userId,
+        // interviewId,
+        answerText: correctedTranscript || "",
+        transcript: transcript || ""
+      };
+
+      // updating local answers array
+      const updatedAnswers = [...answers];
+      updatedAnswers[activeQuestionIndex] = currentAnswer;
+      setAnswers(updatedAnswers);
+
+      const payload = {
         userId,
         interviewId,
-        answerText: transcript,
-        transcript: transcript
+        questionIndex: activeQuestionIndex,
+        answerText: correctedTranscript || "",
+        transcript: transcript || ""
       };
+
       const res = await fetch(`/api/answers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -91,6 +140,7 @@ useEffect(() => {
 
       resetTranscript();
       setTime(10);
+      setIsListening(false);
 
       if (typeof onNextQuestion === "function") {
         onNextQuestion();
@@ -103,6 +153,16 @@ useEffect(() => {
     }
   };
 
+  // Reset when question changes
+  useEffect(() => {
+    SpeechRecognition.stopListening();
+    clearInterval(timerRef.current);
+    resetTranscript();
+    setTime(10); // or setTime(0) if you want it blank until user starts again
+    setIsListening(false)
+  }, [activeQuestionIndex]);
+
+
   return (
     <div className="flex flex-col items-center">
       {/* Webcam Container */}
@@ -114,7 +174,7 @@ useEffect(() => {
 
       {/* Controls */}
       <div className="flex gap-4 mt-6">
-        {!listening ? (
+        {!isListening ? (
           <Button
             onClick={handleStart}
             className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-green-500/40 transition-all duration-300 cursor-pointer"
