@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import QuestionSection from './_components/QuestionSection';
 import RecordAnswerSection from './_components/RecordAnswerSection';
+import toast from 'react-hot-toast';
 
 const StartInterview = ({params}) => {
     const [loading, setLoading] = useState(true);
@@ -20,7 +21,7 @@ const StartInterview = ({params}) => {
             // console.log(data);
 
             const jsonMockResp = data.interview[0].jsonMockResp;
-            console.log(jsonMockResp)
+            console.log(data)
             setMockInterviewQuestion(jsonMockResp);
             setInterviewData(data.interview[0]);
             
@@ -32,6 +33,19 @@ const StartInterview = ({params}) => {
         };
         fetchInterview();
       }, [params]);
+        if (loading) return <p>Loading...</p>;
+        if (error) return <p className="text-red-600">{error}</p>;
+
+      const handleNextQuestion = ()=>{
+        setActiveQuestionIndex((prevIndex)=>{
+            if(prevIndex < mockInterviewQuestion.length - 1){
+                return prevIndex + 1;
+            }else{
+                toast.success("You completed all the questions");
+                return prevIndex;
+            }
+        })
+      }
 
   return (
     <div>
@@ -40,7 +54,7 @@ const StartInterview = ({params}) => {
             <QuestionSection mockInterviewQuestion={mockInterviewQuestion} activeQuestionIndex={activeQuestionIndex}/>
 
             {/* Video/ audio recording */}
-            <RecordAnswerSection/>
+            <RecordAnswerSection interviewId={interviewData?.id} onNextQuestion={handleNextQuestion} userId={interviewData?.userId} activeQuestionIndex={activeQuestionIndex}/>
         </div>
     </div>
   )
