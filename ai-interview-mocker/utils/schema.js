@@ -12,15 +12,14 @@ export const mockInterview = pgTable("mockInterview", {
   mockId: uuid("mockId").notNull(),
 });
 
-export const userAnswers = pgTable("userAnswers",{
-    id: serial("id").primaryKey(),
-    userId: varchar("userId", { length: 255 }).notNull(),
-    interviewId: integer("interviewId").notNull().references(()=>mockInterview.id),
-    answerText: text("answerText").notNull(),
-    transcript: text("transcript").notNull(),
-    evaluationScore: integer("evaluationScore"),
-    evaluationReport: jsonb("evaluationReport"),
-    createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
-})
-
-
+export const userAnswers = pgTable("userAnswers", {
+  id: serial("id").primaryKey(),
+  userId: varchar("userId", { length: 255 }).notNull(),
+  interviewId: integer("interviewId").notNull().references(() => mockInterview.id),
+  questionIndex: integer("questionIndex").notNull(), // <-- add this
+  answerText: text("answerText").notNull(),
+  transcript: text("transcript").notNull(),
+  evaluationScore: integer("evaluationScore"),
+  evaluationReport: jsonb("evaluationReport"),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
+});

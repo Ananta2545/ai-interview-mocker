@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuestionIndex }) => {
   const [saving, setSaving] = useState(false);
-  const [time, setTime] = useState(10);
+  const [time, setTime] = useState(50);
   const timerRef = useRef(null);
   const [isListening, setIsListening] = useState(false);
   const [answers, setAnswers] = useState([]);
@@ -37,7 +37,7 @@ useEffect(() => {
 useEffect(() => {
   if (!isListening) return;
 
-  setTime(10); // reset timer on start
+  setTime(50); // reset timer on start
   clearInterval(timerRef.current);
   timerRef.current = setInterval(() => {
     setTime(prev => {
@@ -139,7 +139,7 @@ useEffect(() => {
       if (!res.ok) throw new Error("Failed to save answer");
 
       resetTranscript();
-      setTime(10);
+      setTime(50);
       setIsListening(false);
 
       if (typeof onNextQuestion === "function") {
@@ -158,7 +158,7 @@ useEffect(() => {
     SpeechRecognition.stopListening();
     clearInterval(timerRef.current);
     resetTranscript();
-    setTime(10); // or setTime(0) if you want it blank until user starts again
+    setTime(50); // or setTime(0) if you want it blank until user starts again
     setIsListening(false)
   }, [activeQuestionIndex]);
 
