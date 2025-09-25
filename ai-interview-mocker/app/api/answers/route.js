@@ -162,16 +162,16 @@ export async function GET(req){
     const limit = searchParams.get('limit') || "5";
     const userId = searchParams.get("userId")
 
-    const {userId: authUserId} = getAuth(req);
-    if(!authUserId) return NextResponse.json({error: "Unauthorized"}, {status: 404});
+    // const {userId: authUserId} = getAuth(req);
+    // if(!authUserId) return NextResponse.json({error: "Unauthorized"}, {status: 404});
 
     if(!interviewId || !userId){
       return NextResponse.json({error: "Missing required fields"}, {status: 400});
     }
 
-    if(authUserId !== userId){
-      return NextResponse.json({error: "Access denied"}, {status: 403});
-    }
+    // if(authUserId !== userId){
+    //   return NextResponse.json({error: "Access denied"}, {status: 403});
+    // }
 
     // fetching the interview details
     const interview = await db.select().from(mockInterview).where(eq(mockInterview.id, interviewId));
