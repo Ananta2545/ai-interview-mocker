@@ -4,13 +4,14 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
-  '/'
 ])
 
 const isApiRoute = createRouteMatcher([
   // '/app/(.*)',
   '/api/(.*)'
 ])
+
+const isProtectedRoute = createRouteMatcher(['/dashboard(.*)']);
 
 // export default clerkMiddleware(async (auth, req) => {
   
@@ -25,11 +26,19 @@ export default clerkMiddleware(async (auth, req) => {
   console.log('Path:', pathname);
   console.log('Is Public Route:', isPublicRoute(req));
   console.log('Is API Route:', isApiRoute(req));
+
+  if(isProtectedRoute(req)){
+    console.log("HELOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+    await auth.protect();
+    return;
+  }
   
   if (!isPublicRoute(req) && !isApiRoute(req)) {
     const { userId } = await auth();
     console.log('User ID:', userId);
     console.log('User authenticated:', !!userId);
+
+    console.log("MIDDLE WARE USER ID : ", userId);
     
     if (!userId) {
       console.log('❌ No user - redirecting to sign-in');
@@ -44,8 +53,5 @@ export default clerkMiddleware(async (auth, req) => {
 })
 
 export const config = {
-  matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-  ],
+  matcher: ["/((?!_next|.*\\..*).*)"],
 }

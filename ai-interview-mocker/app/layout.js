@@ -21,8 +21,8 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <>
-      <Toaster position="top-right" reverseOrder={false}/>
       <ClerkProvider>
+      <Toaster position="top-right" reverseOrder={false}/>
         <html lang="en">
           <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}

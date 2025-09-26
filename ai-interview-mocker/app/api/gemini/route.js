@@ -30,7 +30,7 @@ Each question should have the following structure:
 Return only valid JSON, do not include any extra text or formatting.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-001',
+      model: 'gemini-2.5-pro',
       contents: prompt,
     });
 

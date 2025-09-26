@@ -35,7 +35,7 @@ Text to correct: "${transcribedText}"
 Return only the corrected text, no extra formatting or explanation.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-001',
+      model: 'gemini-2.5-pro',
       contents: prompt,
     });
 

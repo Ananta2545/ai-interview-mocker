@@ -22,4 +22,45 @@ export const userAnswers = pgTable("userAnswers", {
   evaluationScore: integer("evaluationScore"),
   evaluationReport: jsonb("evaluationReport"),
   createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updatedAt", { withTimezone: true }).defaultNow(),
+});
+
+// Parent table for quizzes
+export const quizzes = pgTable("quizzes", {
+  id: serial("id").primaryKey(),
+  userId: varchar("userId", { length: 255 }).notNull(),
+  topic: varchar("topic", { length: 255 }).notNull(),
+  level: varchar("level", { length: 50 }).notNull(),
+  questionCount: integer("questionCount").notNull(),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
+});
+
+
+// Schema for quiz questions
+export const quizQuestions = pgTable("quizQuestions", {
+  id: serial("id").primaryKey(),
+  quizId: integer("quizId").notNull().references(() => quizzes.id),
+  userId: varchar("userId", {length : 255}).notNull(),
+  questionText: text("questionText").notNull(),
+  options: jsonb("options").notNull(),  // [A B C D]
+  correctAnswer: text("correctAnswer").notNull(),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
+})
+
+export const quizAnswers = pgTable("quizAnswers", {
+  id: serial("id").primaryKey(),
+  userId: varchar("userId", { length: 255 }).notNull(),
+  questionId: integer("questionId").notNull().references(() => quizQuestions.id),
+  selectedAnswer: text("selectedAnswer").notNull(),
+  isCorrect: integer("isCorrect").notNull(), // 1 = correct, 0 = wrong
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
+});
+
+export const quizResults = pgTable("quizResults", {
+  id: serial("id").primaryKey(),
+  userId: varchar("userId", { length: 255 }).notNull(),
+  quizId: integer("quizId").notNull().references(() => quizzes.id),
+  score: integer("score").notNull(),
+  totalQuestions: integer("totalQuestions").notNull(),
+  createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
 });
