@@ -1,4 +1,4 @@
-"use server";
+// "use server";
 import { NextResponse } from 'next/server';
 import { db } from '../../../utils/db.js';
 import { userAnswers, mockInterview } from '../../../utils/schema.js';
@@ -154,6 +154,8 @@ Return JSON ONLY in this exact structure:
   }
 }
 
+// Line 155 - Replace the GET function:
+
 export async function GET(req){
   try{
     const {searchParams} = new URL(req.url);
@@ -161,79 +163,134 @@ export async function GET(req){
     const limit = searchParams.get('limit') || "5";
     const userId = searchParams.get("userId")
 
-    // const {userId: authUserId} = getAuth(req);
-    // if(!authUserId) return NextResponse.json({error: "Unauthorized"}, {status: 404});
+    console.log("📊 GET /api/answers - Params:", { interviewId, limit, userId });
 
+    // Validate required parameters
     if(!interviewId || !userId){
-      return NextResponse.json({error: "Missing required fields"}, {status: 400});
+      return NextResponse.json({
+        success: false,
+        error: "Missing required fields: interviewId and userId"
+      }, {status: 400});
     }
 
-    // if(authUserId !== userId){
-    //   return NextResponse.json({error: "Access denied"}, {status: 403});
-    // }
-
-    // fetching the interview details
-    const interview = await db.select().from(mockInterview).where(eq(mockInterview.id, interviewId));
+    // Fetch the interview details
+    const interview = await db.select()
+      .from(mockInterview)
+      .where(eq(mockInterview.id, interviewId))
+      .limit(1);
 
     if(!interview.length){
-      return NextResponse.json({error: "Interview not found"}, {status: 404});
+      return NextResponse.json({
+        success: false,
+        error: "Interview not found"
+      }, {status: 404});
     }
 
-    const answers = await db.select().from(userAnswers).where(and(eq(userAnswers.userId, userId), eq(userAnswers.interviewId, interviewId))).orderBy(userAnswers.createdAt).limit(parseInt(limit));
+    // Fetch answers
+    const answers = await db.select()
+      .from(userAnswers)
+      .where(and(
+        eq(userAnswers.userId, userId), 
+        eq(userAnswers.interviewId, interviewId)
+      ))
+      .orderBy(userAnswers.createdAt)
+      .limit(parseInt(limit));
 
+    console.log(`✅ Found ${answers.length} answers`);
+
+    // If no answers, return empty result (not an error)
     if (!answers.length) {
       return NextResponse.json({ 
-        error: "No answers found for this interview" 
-      }, { status: 404 });
-    }
-
-    const formattedReports = answers.map(answer => {
-      let evaluationReport = answer.evaluationReport;
-      
-      // Parse JSON if it's stored as string
-      if (typeof evaluationReport === 'string') {
-        try {
-          evaluationReport = JSON.parse(evaluationReport);
-        } catch (e) {
-          console.error('Error parsing evaluation report:', e);
-          evaluationReport = {
-            question: "Error loading question",
-            expectedAnswer: "Error loading expected answer",
-            userAnswer: answer.answerText,
-            technicalAccuracy: 0,
+        success: true,
+        interviewDetails: {
+          id: interview[0].id,
+          jobPosition: interview[0].jobPosition,
+          jobDesc: interview[0].jobDesc,
+          jobExperience: interview[0].jobExperience,
+          createdAt: interview[0].createdAt
+        },
+        summary: {
+          totalReports: 0,
+          averageScore: 0,
+          totalScore: 0,
+          categoryAverages: {
+            technical: 0,
             completeness: 0,
             clarity: 0,
-            relevance: 0,
-            totalScore: 0,
-            feedback: "Error loading evaluation",
-            suggestions: []
-          };
-        }
-      }
-      return {
-        success: true,
-        evaluation: {
-          question: evaluationReport.question || "Question not available",
-          expectedAnswer: evaluationReport.expectedAnswer || "Expected answer not available",
-          userAnswer: evaluationReport.userAnswer || answer.answerText,
-          technicalAccuracy: evaluationReport.technicalAccuracy || 0,
-          completeness: evaluationReport.completeness || 0,
-          clarity: evaluationReport.clarity || 0,
-          relevance: evaluationReport.relevance || 0,
-          totalScore: evaluationReport.totalScore || answer.evaluationScore || 0,
-          feedback: evaluationReport.feedback || "No feedback available",
-          suggestions: evaluationReport.suggestions || []
+            relevance: 0
+          },
+          grade: { grade: 'N/A', description: 'No data', color: 'gray' }
         },
-        score: answer.evaluationScore || 0,
-        questionIndex: parseInt(answer.questionIndex),
-        answerId: answer.id,
-        createdAt: answer.createdAt
+        reports: [],
+        message: "No answers found for this interview"
+      }, { status: 200 });
+    }
+
+    // Format the reports
+    // Replace lines 217-247 (the formattedReports mapping):
+
+// Format the reports
+const formattedReports = answers.map(answer => {
+  let evaluationReport = answer.evaluationReport;
+  
+  if (typeof evaluationReport === 'string') {
+    try {
+      evaluationReport = JSON.parse(evaluationReport);
+    } catch (e) {
+      console.error('Error parsing evaluation report:', e);
+      evaluationReport = {
+        question: "Error loading question",
+        expectedAnswer: "Error loading expected answer",
+        userAnswer: answer.answerText,
+        technicalAccuracy: 0,
+        completeness: 0,
+        clarity: 0,
+        relevance: 0,
+        totalScore: 0,
+        feedback: "Error loading evaluation",
+        suggestions: []
       };
+    }
+  }
+  
+  // Ensure suggestions is always an array of strings
+  let suggestions = evaluationReport.suggestions || [];
+  if (!Array.isArray(suggestions)) {
+    suggestions = [String(suggestions)];
+  } else {
+    // Convert each suggestion to string if it's an object
+    suggestions = suggestions.map(s => {
+      if (typeof s === 'object' && s !== null) {
+        // If suggestion is an object with 'suggestion' or 'example' keys
+        return s.suggestion || s.example || JSON.stringify(s);
+      }
+      return String(s);
     });
+  }
+  
+  return {
+    success: true,
+    evaluation: {
+      question: evaluationReport.question || "Question not available",
+      expectedAnswer: evaluationReport.expectedAnswer || "Expected answer not available",
+      userAnswer: evaluationReport.userAnswer || answer.answerText,
+      technicalAccuracy: evaluationReport.technicalAccuracy || 0,
+      completeness: evaluationReport.completeness || 0,
+      clarity: evaluationReport.clarity || 0,
+      relevance: evaluationReport.relevance || 0,
+      totalScore: evaluationReport.totalScore || answer.evaluationScore || 0,
+      feedback: evaluationReport.feedback || "No feedback available",
+      suggestions: suggestions // Now guaranteed to be string array
+    },
+    score: answer.evaluationScore || 0,
+    questionIndex: parseInt(answer.questionIndex),
+    answerId: answer.id,
+    createdAt: answer.createdAt
+  };
+});
 
     const totalScore = formattedReports.reduce((sum, report) => sum + (report.score || 0), 0);
     const averageScore = formattedReports.length > 0 ? Math.round(totalScore / formattedReports.length) : 0;
-
 
     let totalTechnical = 0, totalCompleteness = 0, totalClarity = 0, totalRelevance = 0;
     
@@ -243,7 +300,6 @@ export async function GET(req){
       totalClarity += report.evaluation.clarity || 0;
       totalRelevance += report.evaluation.relevance || 0;
     });
-
 
     const categoryAverages = {
       technical: formattedReports.length > 0 ? Math.round(totalTechnical / formattedReports.length) : 0,
@@ -261,7 +317,7 @@ export async function GET(req){
       return { grade: 'D', description: 'Poor', color: 'red' };
     };
 
-    const result = {
+    return NextResponse.json({
       success: true,
       interviewDetails: {
         id: interview[0].id,
@@ -279,12 +335,13 @@ export async function GET(req){
       },
       reports: formattedReports,
       fetchedAt: new Date().toISOString()
-    };
+    }, { status: 200 });
 
-    return NextResponse.json(result);
-
-
-  }catch(error){
-    return NextResponse.json({error: error.message || "Failed to fetch evaluation reports"}, {status: 500});
+  } catch(error){
+    console.error("❌ Error in GET /api/answers:", error);
+    return NextResponse.json({
+      success: false,
+      error: error.message || "Failed to fetch evaluation reports"
+    }, {status: 500});
   }
 }

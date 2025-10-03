@@ -191,7 +191,7 @@ const InterviewList = () => {
         </div>
         <button
           onClick={() => fetchInterviews(0)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center gap-2 cursor-pointer px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <RefreshCw className="h-4 w-4" />
           Refresh
@@ -248,13 +248,13 @@ const InterviewList = () => {
             <div className="flex gap-2">
               <button 
                 onClick={() => router.push(`/dashboard/interview/${interview.mockId}/start`)}
-                className="flex-1 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex-1 px-4 cursor-pointer py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Start Interview
               </button>
               <button 
-                onClick={() => router.push(`/dashboard/interview/${interview.mockId}/feedback`)}
-                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                onClick={() => router.push(`/dashboard/interview/${interview.id}/feedback`)}
+                className="flex-1 cursor-pointer px-4 py-2.5 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
               >
                 View Feedback
               </button>

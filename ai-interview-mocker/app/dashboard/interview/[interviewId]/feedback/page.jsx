@@ -317,7 +317,10 @@ const FeedbackPage = () => {
                         {report.evaluation.suggestions.map((suggestion, idx) => (
                           <li key={idx} className="flex items-start">
                             <span className="text-orange-500 mr-2">•</span>
-                            <span>{suggestion}</span>
+                            <span>{typeof suggestion === 'string' 
+                                ? suggestion 
+                                : suggestion.suggestion || suggestion.example || JSON.stringify(suggestion)
+                              }</span>
                           </li>
                         ))}
                       </ul>
