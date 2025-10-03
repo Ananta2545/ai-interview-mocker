@@ -9,6 +9,12 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+/API_DOCUMENTATION.md
+/COMPONENT_HIERARCHY.md
+/DATABASE_SCHEMA.md
+PROJECT_OVERVIEW.md
+SETUP_GUIDE.md
+WORKFLOW.md
 
 # testing
 /coverage

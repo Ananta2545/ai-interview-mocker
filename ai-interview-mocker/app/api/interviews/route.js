@@ -1,20 +1,24 @@
 import { mockInterview } from '../../../utils/schema.js';
 import { db } from '../../../utils/db.js';
-import {auth, getAuth } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
+
+// Force dynamic rendering and prevent caching
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 export async function GET(req){
     try{
-
-        console.log("🚀 API Route Hit");
-        console.log("REQUEST IS ==============: ", req.authorization)
-        const {userId} = getAuth(req);
-        const authData = getAuth(req);
-
-        console.log("AUTH DATA IS ", authData)
+        console.log("Interview API Route Hit");
+        
+        const {userId} = await auth();
+        console.log("Auth userId: ", userId)
+        
         if(!userId){
-            return NextResponse.json({error: "unauthorized"}, {status: 404});
+            return NextResponse.json({error: "Unauthorized - No user found"}, {status: 401});
         }
 
         const interviews = await db.select({
@@ -29,7 +33,7 @@ export async function GET(req){
         })
         .from(mockInterview)
         .where(eq(mockInterview.userId, userId))
-        .orderBy(mockInterview.createdAt);
+        .orderBy(desc(mockInterview.createdAt));
 
          const formattedInterviews = interviews.map(interview => ({
             id: interview.id,
@@ -55,3 +59,4 @@ export async function GET(req){
         }, {status: 500});
     }
 }
+

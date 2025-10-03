@@ -1,57 +1,31 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
+  '/',
 ])
-
-const isApiRoute = createRouteMatcher([
-  // '/app/(.*)',
-  '/api/(.*)'
-])
-
-const isProtectedRoute = createRouteMatcher(['/dashboard(.*)']);
-
-// export default clerkMiddleware(async (auth, req) => {
-  
-//   if (!isPublicRoute(req) && !isApiRoute(req)) {
-//     await auth.protect()
-//   }
-// })
 
 export default clerkMiddleware(async (auth, req) => {
   const pathname = req.nextUrl.pathname;
-  console.log('=== MIDDLEWARE DEBUG ===');
-  console.log('Path:', pathname);
-  console.log('Is Public Route:', isPublicRoute(req));
-  console.log('Is API Route:', isApiRoute(req));
+  
+  console.log('🔍 Middleware checking:', pathname);
 
-  if(isProtectedRoute(req)){
-    console.log("HELOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
-    await auth.protect();
+  // If it's a public route, allow it without auth
+  if (isPublicRoute(req)) {
+    console.log('✅ Public route allowed');
     return;
   }
-  
-  if (!isPublicRoute(req) && !isApiRoute(req)) {
-    const { userId } = await auth();
-    console.log('User ID:', userId);
-    console.log('User authenticated:', !!userId);
 
-    console.log("MIDDLE WARE USER ID : ", userId);
-    
-    if (!userId) {
-      console.log('❌ No user - redirecting to sign-in');
-      await auth.protect();
-    } else {
-      console.log('✅ User authenticated - allowing access');
-    }
-  } else {
-    console.log('ℹ️ Public/API route - skipping auth');
-  }
-  console.log('========================');
+  // For all protected routes (including API routes), protect them
+  console.log('🔒 Protecting route');
+  await auth.protect();
+  console.log('✅ User authenticated for:', pathname);
 })
 
 export const config = {
-  matcher: ["/((?!_next|.*\\..*).*)"],
+  matcher: [
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
+    '/(api|trpc)(.*)',
+  ],
 }
