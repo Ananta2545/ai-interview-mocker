@@ -171,15 +171,8 @@ const InterviewList = () => {
           </div>
           <h3 className="text-2xl font-bold text-gray-900 mb-3">Ready to Start?</h3>
           <p className="text-gray-600 mb-6">
-            You haven't created any mock interviews yet. Create your first interview to get started!
+            You haven't created any mock interviews yet. Click above add new button to continue.
           </p>
-          <button 
-            onClick={() => router.push('/dashboard/interview/create')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium inline-flex items-center gap-2"
-          >
-            <Briefcase className="h-5 w-5" />
-            Create Your First Interview
-          </button>
         </div>
       </div>
     );
