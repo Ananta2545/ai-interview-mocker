@@ -32,6 +32,7 @@ export const quizzes = pgTable("quizzes", {
   topic: varchar("topic", { length: 255 }).notNull(),
   level: varchar("level", { length: 50 }).notNull(),
   questionCount: integer("questionCount").notNull(),
+  timeLimit: integer('time_limit').default(60),
   createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),
 });
 

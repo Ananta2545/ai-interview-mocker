@@ -1,3 +1,4 @@
+import { auth } from '@clerk/nextjs/server';
 import { db } from '../../../../utils/db';
 import { quizQuestions, quizzes } from '../../../../utils/schema';
 import { GoogleGenAI } from '@google/genai';
@@ -8,10 +9,24 @@ const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 export async function POST(req) {
   try {
-    const { userId, numQuestions, topic, level } = await req.json();
+    const { userId, numQuestions, topic, level, timeLimit } = await req.json();
 
-    if (!userId || !numQuestions || !topic || !level) {
+    
+    const {userId: authenticatedUserId} = await auth();
+
+    if(!authenticatedUserId){
+      console.log("Unauthorized access");
+      return NextResponse.json({error: "Unauthorized please sign in"}, {status: 401})
+    }
+    console.log("Authenticated user: ", authenticatedUserId);
+
+    if (!userId || !numQuestions || !topic || !level || !timeLimit) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    if(userId !== authenticatedUserId){
+      console.log("User mismatch", {provided: userId, authenticated: authenticatedUserId});
+      return NextResponse.json({error: "Forbidded - user mismatch"}, {status: 403});
     }
 
     // Step 1: Create parent quiz row
@@ -20,7 +35,8 @@ export async function POST(req) {
       topic,
       level,
       questionCount: numQuestions, // initially set
-    }).returning({ id: quizzes.id });
+      timeLimit: timeLimit || 60,
+    }).returning({ id: quizzes.id, timeLimit: quizzes.timeLimit });
 
     // Step 2: Prompt Gemini for questions
     const prompt = `
@@ -76,7 +92,7 @@ Example format:
     }
 
     // Step 5: Return quizId and questions
-    return NextResponse.json({ success: true, quizId: quiz.id, questions });
+    return NextResponse.json({ success: true, quizId: quiz.id, questions, timeLimit: quiz.timeLimit });
 
   } catch (error) {
     console.error(error);

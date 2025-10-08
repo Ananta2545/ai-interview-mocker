@@ -10,7 +10,6 @@ import React, {useEffect, useState } from "react";
 const navItems = [
   { label: "Dashboard", href: "/dashboard" },
   { label: "Questions", href: "/dashboard/questions" },
-  { label: "Upgrade", href: "/dashboard/upgrade" },
   { label: "How it works?", href: "/how-it-works" },
 ];
 
