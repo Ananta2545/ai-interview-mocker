@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { Mic, Maximize, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuestionIndex }) => {
+const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuestionIndex, setAllowFullscreenExit }) => {
   const [saving, setSaving] = useState(false);
   const [time, setTime] = useState(50);
   const timerRef = useRef(null);
@@ -149,6 +149,11 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
   }, [requestFullScreen]);
 
   const handleStop = useCallback(() => {
+    // Allow fullscreen exit without counting as violation
+    if (setAllowFullscreenExit) {
+      setAllowFullscreenExit(true);
+    }
+    
     SpeechRecognition.stopListening();
     clearInterval(timerRef.current);
     setIsListening(false);
@@ -164,13 +169,25 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
     } else if (document.msExitFullscreen) {
       document.msExitFullscreen();
     }
-  }, []);
+    
+    // Reset flag after a short delay
+    setTimeout(() => {
+      if (setAllowFullscreenExit) {
+        setAllowFullscreenExit(false);
+      }
+    }, 500);
+  }, [setAllowFullscreenExit]);
 
   const handleSave = useCallback(async () => {
     if (!transcript || transcript.trim() === "") {
       toast.error("No speech detected. Please try speaking before saving.");
       setSaving(false);
       return;
+    }
+
+    // Allow fullscreen exit without counting as violation
+    if (setAllowFullscreenExit) {
+      setAllowFullscreenExit(true);
     }
 
     setSaving(true);
@@ -238,8 +255,14 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
       toast.error("Error saving answer. Please try again.");
     } finally {
       setSaving(false);
+      // Reset flag after a short delay
+      setTimeout(() => {
+        if (setAllowFullscreenExit) {
+          setAllowFullscreenExit(false);
+        }
+      }, 500);
     }
-  }, [transcript, interviewId, activeQuestionIndex, userId, onNextQuestion, resetTranscript]);
+  }, [transcript, interviewId, activeQuestionIndex, userId, onNextQuestion, resetTranscript, setAllowFullscreenExit]);
 
   // Reset when question changes
   useEffect(() => {

@@ -16,6 +16,7 @@ const StartInterview = ({params}) => {
     const [evaluating, setEvaluating] = useState(false);
     const [showFullscreenWarning, setShowFullscreenWarning] = useState(false);
     const [fullscreenExitCount, setFullscreenExitCount] = useState(0);
+    const [allowFullscreenExit, setAllowFullscreenExit] = useState(false); // Flag to allow legitimate exits
 
     const router = useRouter();
 
@@ -57,7 +58,8 @@ const StartInterview = ({params}) => {
           // Only show warning if:
           // 1. They were in fullscreen and then exited
           // 2. It's not the initial page load
-          if (wasInFullscreen && !isInFullscreen && !isInitialLoad) {
+          // 3. It's not a legitimate action (stop, save, submit)
+          if (wasInFullscreen && !isInFullscreen && !isInitialLoad && !allowFullscreenExit) {
             const newCount = fullscreenExitCount + 1;
             setFullscreenExitCount(newCount);
             
@@ -85,7 +87,7 @@ const StartInterview = ({params}) => {
           clearTimeout(timer);
           document.removeEventListener('fullscreenchange', handleFullscreenChange);
         };
-      }, [fullscreenExitCount, router]);
+      }, [fullscreenExitCount, router, allowFullscreenExit]);
 
       const handleReEnterFullscreen = () => {
         document.documentElement.requestFullscreen().then(() => {
@@ -105,6 +107,9 @@ const StartInterview = ({params}) => {
             if(prevIndex < mockInterviewQuestion.length - 1){
                 return prevIndex + 1;
             }else{
+                // Allow fullscreen exit for completion
+                setAllowFullscreenExit(true);
+                
                 toast.success("You completed all the questions");
                 setEvaluating(true);
                 setTimeout(() => {
@@ -168,6 +173,7 @@ const StartInterview = ({params}) => {
               onNextQuestion={handleNextQuestion} 
               userId={interviewData?.userId} 
               activeQuestionIndex={activeQuestionIndex}
+              setAllowFullscreenExit={setAllowFullscreenExit}
             />
         </div>
     </div>
