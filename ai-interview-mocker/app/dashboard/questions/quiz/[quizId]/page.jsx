@@ -6,6 +6,7 @@ import { Progress } from "../../../../../components/ui/progress";
 import { ArrowRight, CheckCircle, Clock, SkipForwardIcon, XCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState, useCallback } from "react";
+import toast from "react-hot-toast";
 
 const QuizPage = ({ params }) => {
   const [quiz, setQuiz] = useState();
@@ -99,6 +100,7 @@ const QuizPage = ({ params }) => {
   };
 
   const handleSkip = () => {
+    const currentQ = quiz.questions[currentQuestion];
     setAnswers({
       ...answers,
       [currentQuestion]: {
@@ -125,7 +127,7 @@ const QuizPage = ({ params }) => {
 
   const finishQuiz = async () => {
     if (!user?.id) {
-      alert('User not authenticated');
+      toast.error('User not authenticated');
       router.push('/sign-in');
       return;
     }
@@ -144,7 +146,13 @@ const QuizPage = ({ params }) => {
       });
 
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Failed to submit quiz');
+      }
+      
       if (data.success) {
+        toast.success('Quiz submitted successfully!');
         // Keep submitting state true during redirect
         router.push(`/dashboard/questions/results/${data.resultId}`);
       } else {
@@ -154,7 +162,7 @@ const QuizPage = ({ params }) => {
     } catch (error) {
       console.error("Error submitting quiz:", error);
       setSubmitting(false);
-      toast.error('Failed to submit quiz. Please try again.');
+      toast.error(error.message || 'Failed to submit quiz. Please try again.');
     }
   };
 

@@ -65,6 +65,10 @@ export async function POST(req) {
 
   } catch (error) {
     console.error("Quiz submit error:", error);
-    return NextResponse.json({ message: error.message || "Server down" }, { status: 500 });
+    return NextResponse.json({ 
+      success: false,
+      error: error.message || "Failed to submit quiz. Please try again.",
+      message: "Server error" 
+    }, { status: 500 });
   }
 }
