@@ -57,12 +57,6 @@ const Header = () => {
 
         {/* Right side desktop */}
         <div className="ml-auto hidden md:flex items-center gap-3">
-          <Link
-            href="/dashboard/upgrade"
-            className={`inline-flex items-center rounded-md border bg-gradient-to-r from-primary/90 to-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm ring-1 ring-inset ring-primary/40 transition-all duration-300 hover:scale-105 hover:shadow-md hover:from-primary hover:to-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60`}
-          >
-            Upgrade
-          </Link>
           <UserButton
             appearance={{
               elements: {

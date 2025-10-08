@@ -1,8 +1,8 @@
 "use client";
 import { Button } from "../../../../components/ui/button.jsx";
-import { Lightbulb, WebcamIcon } from "lucide-react";
+import { Lightbulb, WebcamIcon, Monitor, MonitorOff } from "lucide-react";
 import { useRouter } from "next/navigation.js";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Webcam from "react-webcam";
 import toast from "react-hot-toast";
 
@@ -13,8 +13,7 @@ const Interview = ({ params }) => {
   const [webCamEnabled, setWebCamEnabled] = useState(false);
   const [showFullScreenModal, setShowFullScreenModal] = useState(false);
   const [screenStream, setScreenStream] = useState(null);
-  const [screenShareReady, setScreenShareReady] = useState(false);
-
+  const [screenSharing, setScreenSharing] = useState(false);
 
   const router = useRouter();
 
@@ -40,34 +39,88 @@ const Interview = ({ params }) => {
     fetchInterview();
   }, [params]);
 
-  const startScreenShare = async ()=>{
-    try{
-        const stream = await navigator.mediaDevices.getDisplayMedia({
-            video: {
-                displaySurface: "monitor",
-                cursor: "always",
-                width: { ideal: 1920 },
-                height: { ideal: 1080 }
-            },
-            audio: true,
-        });
-        const videoTrack = stream.getVideoTracks()[0];
-        const settings = videoTrack.getSettings();
-        if (settings.displaySurface !== "monitor") {
-      // Stop the stream
-            stream.getTracks().forEach(track => track.stop());
-            alert("Share full screen");
-            toast.error("Please select 'Entire Screen', not a tab or window.")
-            return;
-        }
-        setScreenStream(stream);
-        setScreenShareReady(true);
-        toast.success("Screen sharing started successfully!");
-    }catch(error){
-        console.error("Screen share error : ", error);
-        toast.error("Screen share permission denied or not supported.");
+  const startScreenShare = useCallback(async () => {
+    if (screenSharing) {
+      toast.info("Screen sharing is already active");
+      return;
     }
-  }
+
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          displaySurface: "monitor",
+          cursor: "always",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        },
+        audio: true,
+      });
+
+      const videoTrack = stream.getVideoTracks()[0];
+      const settings = videoTrack.getSettings();
+
+      if (settings.displaySurface !== "monitor") {
+        stream.getTracks().forEach((track) => track.stop());
+        toast.error(
+          "Please share your entire screen (monitor) instead of a window or tab."
+        );
+        return;
+      }
+
+      // Handle when user stops sharing via browser UI
+      videoTrack.onended = () => {
+        setScreenSharing(false);
+        setScreenStream(null);
+        toast.error("Screen sharing stopped. Please enable it again.");
+      };
+
+      setScreenStream(stream);
+      setScreenSharing(true);
+      
+      // Store stream reference globally for next page
+      if (typeof window !== 'undefined') {
+        window.__screenStream = stream;
+      }
+      
+      toast.success("Screen sharing started successfully!");
+    } catch (error) {
+      console.error("Screen share error:", error);
+      if (error.name === "NotAllowedError") {
+        toast.error("Screen sharing permission denied. Please allow screen sharing to continue.");
+      } else if (error.name === "NotSupportedError") {
+        toast.error("Screen sharing is not supported in this browser.");
+      } else {
+        toast.error("Screen share permission denied or not supported.");
+      }
+    }
+  }, [screenSharing]);
+
+  const handleStopScreenShare = useCallback(() => {
+    if (screenStream) {
+      screenStream.getTracks().forEach((track) => track.stop());
+      setScreenStream(null);
+      setScreenSharing(false);
+      
+      // Clean up global reference
+      if (typeof window !== 'undefined') {
+        window.__screenStream = null;
+      }
+      
+      toast.success("Screen sharing stopped");
+    }
+  }, [screenStream]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (screenStream) {
+        screenStream.getTracks().forEach((track) => track.stop());
+        if (typeof window !== 'undefined') {
+          window.__screenStream = null;
+        }
+      }
+    };
+  }, [screenStream]);
 
   if (loading) {
     return (
@@ -124,6 +177,39 @@ const Interview = ({ params }) => {
 
           {/* Right Side: Proctoring Area */}
           <div className="flex flex-col items-center justify-center bg-gray-50 p-6 rounded-xl shadow-sm">
+            {/* Screen Sharing Status */}
+            {!screenSharing && (
+              <div className="w-full mb-4 bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
+                <div className="flex items-center">
+                  <MonitorOff className="h-5 w-5 text-red-500 mr-2" />
+                  <p className="text-red-700 font-medium">
+                    Screen sharing is not active. Please enable screen sharing to continue.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {screenSharing && (
+              <div className="w-full mb-4 bg-green-50 border-l-4 border-green-400 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Monitor className="h-5 w-5 text-green-500 mr-2" />
+                    <p className="text-green-700 font-medium">
+                      Screen sharing is active
+                    </p>
+                  </div>
+                  <Button
+                    onClick={handleStopScreenShare}
+                    size="sm"
+                    variant="outline"
+                    className="text-red-600 border-red-600 hover:bg-red-50"
+                  >
+                    Stop Sharing
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {webCamEnabled ? (
                 <>
               <Webcam
@@ -135,16 +221,17 @@ const Interview = ({ params }) => {
                 style={{ height: 300, width: 300 }}
                 />
                 
-                {!screenShareReady && (
+                {!screenSharing && (
                     <Button
                         onClick={startScreenShare}
                         className="bg-purple-600 mt-4 cursor-pointer hover:bg-purple-800 text-white px-6 py-3 rounded-xl shadow-lg transition-all duration-200"
                     >
-                        Start Screen Share
+                        <Monitor className="mr-2 h-5 w-5" />
+                        Enable Screen Sharing
                     </Button>
                 )}
 
-                {screenShareReady && (
+                {screenSharing && (
                     <Button
                         onClick={() => setShowFullScreenModal(true)}
                         className="bg-green-600 mt-4 cursor-pointer hover:bg-green-800 text-white px-6 py-3 rounded-xl shadow-lg transition-all duration-200"

@@ -12,6 +12,7 @@ import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
 import { LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const AddNewInterview = () => {
   const [openDialog, setOpenDialog] = useState(false);
@@ -19,34 +20,88 @@ const AddNewInterview = () => {
   const [jobDesc, setJobDesc] = useState();
   const [jobExperiance, setJobExperiance] = useState();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const router = useRouter();
 
 
   const onSubmit = async (e) => {
-    setLoading(true);
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+    
     try{
+        console.log("🚀 Submitting interview request...");
+        
         const res = await fetch("/api/gemini", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({jobPosition, jobDesc, jobExperiance}),
         })
 
+        const data = await res.json();
+        
         if(!res.ok){
-            const errorData = await res.json();
-            console.error("Backend error:", errorData.error);
+            console.error("❌ Backend error:", data);
+            
+            // Display user-friendly error message
+            const errorMsg = data.userMessage || data.error || "Failed to generate interview questions";
+            setError(errorMsg);
+            
+            // Show toast notification with appropriate icon
+            if (data.errorType === "MODEL_OVERLOADED") {
+              toast.error(errorMsg, {
+                duration: 6000,
+                icon: '🤖',
+              });
+            } else if (data.errorType === "RATE_LIMIT") {
+              toast.error(errorMsg, {
+                duration: 5000,
+                icon: '⏳',
+              });
+            } else if (data.errorType === "NETWORK_ERROR") {
+              toast.error(errorMsg, {
+                duration: 5000,
+                icon: '🌐',
+              });
+            } else if (data.errorType === "TIMEOUT_ERROR") {
+              toast.error(errorMsg, {
+                duration: 5000,
+                icon: '⏱️',
+              });
+            } else {
+              toast.error(errorMsg, {
+                duration: 5000,
+              });
+            }
+            
+            setLoading(false);
             return;
         }
         
+        console.log("✅ Interview created successfully:", data.savedInterview[0]?.mockId);
 
-        const data = await res.json();
-        // console.log("Saved interview in DB:", data.savedInterview);
+        // Success!
+        toast.success("Interview questions generated successfully! 🎉", {
+          duration: 3000,
+        });
+        
         setOpenDialog(false);
         setLoading(false);
+        setError(null);
+        
+        // Navigate to interview page
         router.push('/dashboard/interview/'+ data.savedInterview[0]?.mockId)
+        
     }catch(error){
-        console.log("Error: ", error);
+        console.error("❌ Unexpected error:", error);
+        const errorMsg = "Network error. Please check your connection and try again.";
+        setError(errorMsg);
+        toast.error(errorMsg, {
+          duration: 5000,
+          icon: '🌐',
+        });
+        setLoading(false);
     }
   }
 
@@ -70,6 +125,25 @@ const AddNewInterview = () => {
 
             <form onSubmit={onSubmit}>
 
+            {/* Error message display */}
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">❌</span>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-red-800 mb-1">Error</p>
+                    <p className="text-sm text-red-700">{error}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setError(null)}
+                    className="text-red-400 hover:text-red-600 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
             
                 <div className="text-gray-700 space-y-6">
                     {/* Job details section */}
@@ -134,8 +208,10 @@ const AddNewInterview = () => {
                     <Button type="submit" disabled={loading} className="bg-purple-600 hover:bg-purple-700 text-white transition-all duration-300 cursor-pointer">
                         {loading? 
                         <>
-                        <LoaderCircle className="animate-spin"/>Generating from AI
-                        </>:'Start Interview'
+                        <LoaderCircle className="animate-spin mr-2"/>
+                        <span>Generating from AI...</span>
+                        </>
+                        :'Start Interview'
                         }
                     </Button>
                     </div>
