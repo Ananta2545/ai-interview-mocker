@@ -7,6 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import QuizHistory from "./_components/QuizHistory";
 
 
 
@@ -40,7 +41,8 @@ const QuestionsPage = ()=>{
                     userId: user.id,
                     topic: formData.topic,
                     level: formData.difficulty,
-                    numQuestions: formData.questionCount
+                    numQuestions: formData.questionCount,
+                    timeLimit: formData.timeLimit
                 })
             })
 
@@ -49,12 +51,17 @@ const QuestionsPage = ()=>{
             if(data.success){
                 router.push(`/dashboard/questions/quiz/${data.quizId}`);
             }else{
-                alert('Failed to generate quiz: ' + data.error);
+                // Better error messages
+                if (response.status === 503) {
+                    toast.error('AI service is currently overloaded. Please try again in a few moments.');
+                } else {
+                    toast.error(data.error || 'Failed to generate quiz');
+                }
             }
 
         }catch(error){
             console.error('Error generating quiz:', error);
-            alert('Failed to generate quiz');
+            toast.error('Failed to generate quiz. Please try again.');
         }finally{
             setLoading(false);
         }
@@ -136,6 +143,9 @@ const QuestionsPage = ()=>{
                     </form>
                 </CardContent>
             </Card>
+
+            {/* Quiz History Section */}
+            <QuizHistory />
         </div>
     )
 

@@ -3,9 +3,9 @@ import { useUser } from "@clerk/nextjs";
 import { Button } from "../../../../../components/ui/button";
 import { Card, CardContent } from "../../../../../components/ui/card";
 import { Progress } from "../../../../../components/ui/progress";
-import { ArrowRight, CheckCircle, Clock, SkipForwardIcon, XCircle } from "lucide-react";
+import { ArrowRight, CheckCircle, Clock, SkipForwardIcon, XCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useCallback } from "react";
 
 const QuizPage = ({ params }) => {
   const [quiz, setQuiz] = useState();
@@ -15,28 +15,31 @@ const QuizPage = ({ params }) => {
   const [showResult, setShowResult] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
-  const { quizId } = use(params); // NO use(params), params is already an object
+  const { quizId } = use(params);
   const {user, isLoaded} = useUser();
+
   useEffect(() => {
-    if (isLoaded) { // Wait for user to load
+    if (isLoaded && quizId) {
       fetchQuiz();
     }
-  }, [quizId]);
+  }, [quizId, isLoaded]);
 
-  // Timer
+  // Timer - optimized to avoid unnecessary checks
   useEffect(() => {
-    if (!quiz || showResult) return;
-    if (timeLeft > 0 && selectedOption === null) {
+    if (!quiz || showResult || selectedOption !== null) return;
+    
+    if (timeLeft > 0) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && selectedOption === null) {
+    } else if (timeLeft === 0) {
       handleSkip();
     }
   }, [timeLeft, showResult, selectedOption, quiz]);
 
-  const fetchQuiz = async () => {
+  const fetchQuiz = useCallback(async () => {
     try {
       const response = await fetch(`/api/quiz/${quizId}`);
       const data = await response.json();
@@ -49,12 +52,15 @@ const QuizPage = ({ params }) => {
           correctAnswer: q.correctAnswer || null,
         }));
 
+        // Use timeLimit from database, fallback to 60 if not set
+        const quizTimeLimit = data.quiz.timeLimit || 60;
+
         setQuiz({
           ...data.quiz,
           questions,
-          timeLimit: 60,
+          timeLimit: quizTimeLimit,
         });
-        setTimeLeft(60);
+        setTimeLeft(quizTimeLimit);
       } else {
         alert("Quiz not found");
         router.push("/dashboard/questions");
@@ -65,7 +71,7 @@ const QuizPage = ({ params }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [quizId, router]);
 
   const handleOptionSelect = (optionIndex) => {
     if (selectedOption !== null) return;
@@ -123,6 +129,9 @@ const QuizPage = ({ params }) => {
       router.push('/sign-in');
       return;
     }
+    
+    setSubmitting(true);
+    
     try {
       const response = await fetch("/api/quiz/submit", {
         method: "POST",
@@ -136,10 +145,16 @@ const QuizPage = ({ params }) => {
 
       const data = await response.json();
       if (data.success) {
+        // Keep submitting state true during redirect
         router.push(`/dashboard/questions/results/${data.resultId}`);
+      } else {
+        setSubmitting(false);
+        toast.error(data.error || 'Failed to submit quiz');
       }
     } catch (error) {
       console.error("Error submitting quiz:", error);
+      setSubmitting(false);
+      toast.error('Failed to submit quiz. Please try again.');
     }
   };
 
@@ -237,33 +252,34 @@ const QuizPage = ({ params }) => {
         </CardContent>
       </Card>
 
-      {/* Action Buttons */}
-      <div className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={handleSkip}
-          disabled={selectedOption !== null}
-        >
-          <SkipForwardIcon className="w-4 h-4 mr-2" />
-          Skip Question
-        </Button>
-
-        {selectedOption !== null && (
+      {/* Skip Button - Only show if no answer selected */}
+      {selectedOption === null && (
+        <div className="flex justify-center">
           <Button
-            onClick={moveToNext}
-            className="bg-blue-600 hover:bg-blue-700"
+            variant="outline"
+            onClick={handleSkip}
+            className="border-orange-300 text-orange-600 hover:bg-orange-50"
           >
-            {currentQuestion < quiz.questions.length - 1 ? (
-              <>
-                Next Question
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </>
-            ) : (
-              "Finish Quiz"
-            )}
+            <SkipForwardIcon className="w-4 h-4 mr-2" />
+            Skip Question
           </Button>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Submission Loading Overlay */}
+      {submitting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-300">
+            <Loader2 className="w-16 h-16 animate-spin text-blue-600 mx-auto mb-4" />
+            <p className="text-xl font-semibold text-center text-gray-800">
+              Submitting your answers...
+            </p>
+            <p className="text-sm text-gray-500 text-center mt-2">
+              Please wait while we process your quiz
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

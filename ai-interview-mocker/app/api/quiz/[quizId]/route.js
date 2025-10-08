@@ -6,11 +6,19 @@ import { NextResponse } from 'next/server';
 
 export async function GET(req, { params }) {
   try {
-    const { quizId } = params;
+    // Await params before accessing properties (Next.js 15 requirement)
+    const { quizId } = await params;
+    
+    // Parse quizId as integer
+    const quizIdInt = parseInt(quizId, 10);
+    
+    if (isNaN(quizIdInt)) {
+      return NextResponse.json({ success: false, error: "Invalid quiz ID" }, { status: 400 });
+    }
 
     // Fetch quiz
     const quiz = await db.query.quizzes.findFirst({
-      where: eq(quizzes.id, quizId),
+      where: eq(quizzes.id, quizIdInt),
     });
 
     if (!quiz) {
@@ -19,7 +27,7 @@ export async function GET(req, { params }) {
 
     // Fetch linked questions
     const questions = await db.query.quizQuestions.findMany({
-      where: eq(quizQuestions.quizId, quizId),
+      where: eq(quizQuestions.quizId, quizIdInt),
     });
 
     return NextResponse.json({

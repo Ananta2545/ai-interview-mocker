@@ -53,10 +53,43 @@ Example format:
   }
 ]`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-pro',
-      contents: prompt,
-    });
+    // Retry mechanism with fallback models
+    let response;
+    let lastError;
+    // Using correct model names for @google/genai package
+    const models = ['gemini-2.0-flash-exp', 'gemini-1.5-flash-latest', 'gemini-1.5-pro-latest'];
+    
+    for (const model of models) {
+      try {
+        console.log(`Trying model: ${model}`);
+        response = await ai.models.generateContent({
+          model: model,
+          contents: prompt,
+        });
+        console.log(`Success with model: ${model}`);
+        break; // Success, exit loop
+      } catch (error) {
+        console.error(`Error with ${model}:`, error.message);
+        lastError = error;
+        
+        // If it's a 503 (overload) or 404 (not found), try next model
+        if (error.status === 503 || error.status === 404 || error.message?.includes('overloaded') || error.message?.includes('not found')) {
+          console.log(`Model ${model} failed, trying next...`);
+          continue;
+        }
+        
+        // For other errors, throw immediately
+        throw error;
+      }
+    }
+    
+    // If all models failed
+    if (!response) {
+      return NextResponse.json({ 
+        error: 'All AI models are currently unavailable. Please try again in a few minutes.',
+        details: lastError?.message 
+      }, { status: 503 });
+    }
 
     // Step 3: Extract and clean response
     let content = response?.candidates?.[0]?.content?.parts?.[0] || response?.output_text;

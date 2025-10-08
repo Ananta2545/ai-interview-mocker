@@ -5,7 +5,9 @@ import { NextResponse } from 'next/server'
 
 export async function GET(req, context){
     try{
-        const {mockId} = context?.params;
+        // Await params before accessing properties (Next.js 15 requirement)
+        const params = await context.params;
+        const {mockId} = params;
 
         const interview = await db.select().from(mockInterview).where(eq(mockInterview.mockId, mockId));
         if(!interview){
