@@ -8,7 +8,10 @@ export async function POST(req) {
     const { userId, quizId, answers } = await req.json();
 
     if (!userId || !quizId || !answers || Object.keys(answers).length === 0) {
-      return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
+      return NextResponse.json({ 
+        success: false,
+        error: "Missing required fields" 
+      }, { status: 400 });
     }
 
     const insertedAnswers = [];
@@ -16,14 +19,21 @@ export async function POST(req) {
 
     for (const key of Object.keys(answers)) {
       const answer = answers[key];
-      const questionId = answer.questionId; // frontend must send this
+      const questionId = answer.questionId;
       const selectedAnswer = answer.selected || null;
       const skipped = !!answer.skipped;
 
-      if (!questionId) continue;
+      // Skip if questionId is missing or invalid
+      if (!questionId || questionId === undefined || questionId === null) {
+        console.warn(`Skipping answer with missing questionId for key ${key}`);
+        continue;
+      }
 
       const [question] = await db.select().from(quizQuestions).where(eq(quizQuestions.id, questionId));
-      if (!question) continue;
+      if (!question) {
+        console.warn(`Question not found for questionId: ${questionId}`);
+        continue;
+      }
 
       const isCorrect = skipped || !selectedAnswer ? 0 : selectedAnswer === question.correctAnswer ? 1 : 0;
       if (isCorrect) correctCount++;
@@ -44,17 +54,25 @@ export async function POST(req) {
       });
     }
 
-    // Insert quiz result
+    // Validate that we have at least one valid answer
+    if (insertedAnswers.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: "No valid answers to submit. Please try again."
+      }, { status: 400 });
+    }
+
+    // Insert quiz result - use insertedAnswers length for accurate count
     const [quizResult] = await db
       .insert(quizResults)
       .values({
         userId,
         quizId,
         score: correctCount,
-        totalQuestions: Object.keys(answers).length,
+        totalQuestions: insertedAnswers.length,
         createdAt: new Date(),
       })
-      .returning({ id: quizResults.id }); // use table object
+      .returning({ id: quizResults.id });
 
     return NextResponse.json({
       success: true,

@@ -48,10 +48,20 @@ const QuizPage = ({ params }) => {
       if (data.success) {
         const questions = data.quiz.questions.map((q) => ({
           ...q,
+          id: q.id, // Explicitly ensure id is present
           questionText: q.questionText || q.text || "Undefined question",
           options: q.options || [],
           correctAnswer: q.correctAnswer || null,
         }));
+
+        // Validate that all questions have IDs
+        const invalidQuestions = questions.filter(q => !q.id);
+        if (invalidQuestions.length > 0) {
+          console.error("Some questions are missing IDs:", invalidQuestions);
+          toast.error("Quiz data is incomplete. Please contact support.");
+          router.push("/dashboard/questions");
+          return;
+        }
 
         // Use timeLimit from database, fallback to 60 if not set
         const quizTimeLimit = data.quiz.timeLimit || 60;
@@ -63,11 +73,12 @@ const QuizPage = ({ params }) => {
         });
         setTimeLeft(quizTimeLimit);
       } else {
-        alert("Quiz not found");
+        toast.error("Quiz not found");
         router.push("/dashboard/questions");
       }
     } catch (error) {
       console.error("Error fetching quiz:", error);
+      toast.error("Failed to load quiz");
       router.push("/dashboard/questions");
     } finally {
       setLoading(false);
@@ -129,6 +140,14 @@ const QuizPage = ({ params }) => {
     if (!user?.id) {
       toast.error('User not authenticated');
       router.push('/sign-in');
+      return;
+    }
+    
+    // Validate answers before submitting
+    const invalidAnswers = Object.entries(answers).filter(([key, answer]) => !answer.questionId);
+    if (invalidAnswers.length > 0) {
+      console.error("Some answers are missing questionId:", invalidAnswers);
+      toast.error("Quiz data is incomplete. Please refresh and try again.");
       return;
     }
     
