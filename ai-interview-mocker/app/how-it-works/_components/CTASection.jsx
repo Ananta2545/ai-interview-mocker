@@ -40,7 +40,7 @@ const CTASection = () => {
               <Button
                 size="lg"
                 onClick={() => router.push('/dashboard')}
-                className="bg-white text-primary hover:bg-gray-100 font-semibold px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                className="bg-white text-primary hover:bg-gray-100 font-semibold px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
               >
                 Get Started Free
                 <ArrowRight className="ml-2" size={20} />
@@ -50,7 +50,7 @@ const CTASection = () => {
                 size="lg"
                 variant="outline"
                 onClick={() => router.push('/dashboard')}
-                className="border-2 border-white text-black hover:bg-white hover:text-primary font-semibold px-8 py-6 text-lg rounded-xl transition-all duration-300 hover:scale-105"
+                className="border-2 border-white text-black hover:bg-white hover:text-primary font-semibold px-8 py-6 text-lg rounded-xl transition-all duration-300 hover:scale-105 cursor-pointer"
               >
                 View Demo
               </Button>

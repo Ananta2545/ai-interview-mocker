@@ -5,6 +5,11 @@ import { eq, and } from 'drizzle-orm';
 import { auth } from "@clerk/nextjs/server";
 import { GoogleGenAI } from '@google/genai';
 
+// Route segment config - REQUIRED for Next.js to recognize this as an API route
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });

@@ -6,6 +6,10 @@ const isPublicRoute = createRouteMatcher([
   '/',
 ])
 
+const isApiRoute = createRouteMatcher([
+  '/api/(.*)',
+])
+
 export default clerkMiddleware(async (auth, req) => {
   const pathname = req.nextUrl.pathname;
   
@@ -17,8 +21,14 @@ export default clerkMiddleware(async (auth, req) => {
     return;
   }
 
-  // For all protected routes (including API routes), protect them
-  console.log('🔒 Protecting route');
+  // For API routes, don't use auth.protect() - let the route handle auth
+  if (isApiRoute(req)) {
+    console.log('🔓 API route - auth checked in handler');
+    return;
+  }
+
+  // For page routes (dashboard, etc), protect them
+  console.log('🔒 Protecting page route');
   await auth.protect();
   console.log('✅ User authenticated for:', pathname);
 })

@@ -56,11 +56,11 @@ const StepsSection = () => {
             >
               {/* Connection line (hidden on last step) */}
               {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-20 left-1/2 w-full h-0.5 bg-gradient-to-r from-gray-200 to-gray-300 z-0" />
+                <div className="hidden lg:block cursor-pointer absolute top-20 left-1/2 w-full h-0.5 bg-gradient-to-r from-gray-200 to-gray-300 z-0" />
               )}
 
               {/* Step card */}
-              <div className="relative bg-white rounded-2xl border border-gray-200 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 z-10">
+              <div className="relative bg-white cursor-pointer rounded-2xl border border-gray-200 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 z-10">
                 {/* Step number badge */}
                 <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r ${step.gradient} text-white font-bold text-lg mb-4`}>
                   {step.number}

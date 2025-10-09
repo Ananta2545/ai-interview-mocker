@@ -14,7 +14,20 @@ export async function GET(req){
     try{
         console.log("Interview API Route Hit");
         
-        const {userId} = await auth();
+        // Try to get userId from auth first, fallback to header
+        let userId = null;
+        try {
+            const authResult = await auth();
+            userId = authResult?.userId;
+        } catch (e) {
+            console.log("Auth not available, checking header");
+        }
+        
+        // Fallback: Get userId from request header
+        if (!userId) {
+            userId = req.headers.get('x-user-id');
+        }
+        
         console.log("Auth userId: ", userId)
         
         if(!userId){

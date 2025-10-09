@@ -33,6 +33,7 @@ const InterviewList = () => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-id': user.id, // Pass userId in header
         },
         cache: 'no-store',
       });

@@ -16,11 +16,6 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "AI Interview Mocker - Practice Your Interview Skills",
   description: "Practice and improve your interview skills with AI-powered mock interviews. Get real-time feedback and personalized evaluation.",
-  icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/favicon.ico',
-  },
 };
 
 export default function RootLayout({ children }) {

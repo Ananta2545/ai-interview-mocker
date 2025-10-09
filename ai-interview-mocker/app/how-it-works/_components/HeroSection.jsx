@@ -25,30 +25,10 @@ const HeroSection = () => {
           </h1>
 
           {/* Description */}
-          <p className="mx-auto max-w-2xl text-lg md:text-xl text-gray-600 mb-10">
+          <p className="mx-auto max-w-2xl text-lg md:text-xl text-gray-600">
             Practice with AI-generated questions, get instant feedback, and improve your interview skills 
             in a realistic environment. Your path to landing your dream job starts here.
           </p>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12 max-w-4xl mx-auto">
-            {[
-              { number: '10,000+', label: 'Practice Questions' },
-              { number: '95%', label: 'Success Rate' },
-              { number: '5,000+', label: 'Happy Users' },
-              { number: '24/7', label: 'AI Available' },
-            ].map((stat, index) => (
-              <div
-                key={index}
-                className="text-center transform transition-all duration-300 hover:scale-110"
-              >
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-                  {stat.number}
-                </div>
-                <div className="text-sm text-gray-600">{stat.label}</div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </section>
