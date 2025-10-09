@@ -117,19 +117,6 @@ const DemoSection = () => {
                 </button>
               )}
             </div>
-
-            {/* Floating stats */}
-            <div className="absolute -bottom-6 -right-6 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-2xl p-4 border border-gray-200 dark:border-gray-700 transition-all duration-300">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 dark:from-green-600 dark:to-emerald-600 flex items-center justify-center transition-colors duration-300">
-                  <CheckCircle className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">95%</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">Success Rate</div>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Right: Content */}
