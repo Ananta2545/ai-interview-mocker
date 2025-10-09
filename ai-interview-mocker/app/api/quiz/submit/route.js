@@ -20,7 +20,7 @@ export async function POST(req) {
     for (const key of Object.keys(answers)) {
       const answer = answers[key];
       const questionId = answer.questionId;
-      const selectedAnswer = answer.selected || null;
+      const selectedAnswer = answer.selected || "";  // Use empty string instead of null
       const skipped = !!answer.skipped;
 
       // Skip if questionId is missing or invalid
@@ -38,19 +38,21 @@ export async function POST(req) {
       const isCorrect = skipped || !selectedAnswer ? 0 : selectedAnswer === question.correctAnswer ? 1 : 0;
       if (isCorrect) correctCount++;
 
+      // Insert with empty string for skipped answers (schema requires notNull)
       await db.insert(quizAnswers).values({
         userId,
         questionId,
-        selectedAnswer: skipped ? null : selectedAnswer,
+        selectedAnswer: selectedAnswer || "SKIPPED", // Mark skipped answers clearly
         isCorrect,
         createdAt: new Date(),
       });
 
       insertedAnswers.push({
         questionId,
-        selectedAnswer,
+        selectedAnswer: selectedAnswer || "SKIPPED",
         correctAnswer: question.correctAnswer,
         correct: !!isCorrect,
+        skipped: skipped,
       });
     }
 

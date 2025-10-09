@@ -116,7 +116,7 @@ const QuizPage = ({ params }) => {
       ...answers,
       [currentQuestion]: {
         questionId: currentQ.id,
-        selected: null,
+        selected: "", // Use empty string instead of null for database compatibility
         correct: false,
         timeSpent: quiz.timeLimit - timeLeft,
         skipped: true,
