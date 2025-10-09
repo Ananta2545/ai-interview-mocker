@@ -38,11 +38,10 @@ export async function POST(req) {
       const isCorrect = skipped || !selectedAnswer ? 0 : selectedAnswer === question.correctAnswer ? 1 : 0;
       if (isCorrect) correctCount++;
 
-      // Insert with empty string for skipped answers (schema requires notNull)
       await db.insert(quizAnswers).values({
         userId,
         questionId,
-        selectedAnswer: selectedAnswer || "SKIPPED", // Mark skipped answers clearly
+        selectedAnswer: selectedAnswer || "SKIPPED", 
         isCorrect,
         createdAt: new Date(),
       });
