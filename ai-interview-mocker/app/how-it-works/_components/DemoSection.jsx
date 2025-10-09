@@ -114,6 +114,7 @@ const DemoSection = () => {
               <video
                 className="w-full h-full"
                 controls
+                muted
                 autoPlay
                 src="/interviewMockerVideo.mp4"
                 onEnded={handleCloseVideo}
