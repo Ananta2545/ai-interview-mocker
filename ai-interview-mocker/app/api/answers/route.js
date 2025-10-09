@@ -1,10 +1,10 @@
-// "use server";
 import { NextResponse } from 'next/server';
-import { db } from '../../../utils/db.js';
-import { userAnswers, mockInterview } from '../../../utils/schema.js';
+import { db } from '../../../utils/db';
+import { userAnswers, mockInterview } from '../../../utils/schema';
 import { eq, and } from 'drizzle-orm';
-import { getAuth } from "@clerk/nextjs/server";
-const { GoogleGenAI } = require("@google/genai");
+import { auth } from "@clerk/nextjs/server";
+import { GoogleGenAI } from '@google/genai';
+
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
@@ -13,8 +13,8 @@ export async function POST(req) {
   try {
     const { userId, interviewId, questionIndex, answerText, transcript } = await req.json();
 
-    // Auth check
-    const { userId: authUserId } = getAuth(req);
+    // Auth check - FIXED: Use auth() instead of getAuth(req)
+    const { userId: authUserId } = await auth();
     if (!authUserId || authUserId !== userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -72,11 +72,10 @@ Return JSON ONLY in this exact structure:
 }
 `;
 
-
     let evaluation;
     try {
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-2.0-flash-exp',
         contents: evaluationPrompt
       });
 
@@ -84,6 +83,7 @@ Return JSON ONLY in this exact structure:
       content = content.replace(/```json|```/g, '').trim();
       evaluation = JSON.parse(content);
     } catch (err) {
+      console.error('AI evaluation error:', err);
       evaluation = {
         technicalAccuracy: 10,
         completeness: 10,
@@ -91,7 +91,6 @@ Return JSON ONLY in this exact structure:
         relevance: 10,
         totalScore: 40,
         feedback: "Fallback: Unable to parse evaluation. Manual review required.",
-        keyPoints: [],
         suggestions: ["Retry answer evaluation"]
       };
     }
@@ -101,7 +100,7 @@ Return JSON ONLY in this exact structure:
         expectedAnswer: question.answer,
         userAnswer: answerText,
         ...evaluation
-    }
+    };
 
     // Check if answer already exists for this question
     const existing = await db.select().from(userAnswers)
@@ -112,10 +111,9 @@ Return JSON ONLY in this exact structure:
       ))
       .limit(1);
 
-      if (questionIndex === undefined || questionIndex === null) {
-        return NextResponse.json({ error: "questionIndex is required" }, { status: 400 });
-      }
-
+    if (questionIndex === undefined || questionIndex === null) {
+      return NextResponse.json({ error: "questionIndex is required" }, { status: 400 });
+    }
 
     if (existing.length) {
       // Update existing answer
@@ -149,19 +147,18 @@ Return JSON ONLY in this exact structure:
     });
 
   } catch (error) {
-    console.error("Error in POST /userAnswers:", error);
+    console.error("Error in POST /api/answers:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-// Line 155 - Replace the GET function:
-
 export async function GET(req){
   try{
     const {searchParams} = new URL(req.url);
+    console.log(searchParams)
     const interviewId = searchParams.get("interviewId");
     const limit = searchParams.get('limit') || "5";
-    const userId = searchParams.get("userId")
+    const userId = searchParams.get("userId");
 
     console.log("📊 GET /api/answers - Params:", { interviewId, limit, userId });
 
@@ -198,7 +195,7 @@ export async function GET(req){
 
     console.log(`✅ Found ${answers.length} answers`);
 
-    // If no answers, return empty result (not an error)
+    // If no answers, return empty result
     if (!answers.length) {
       return NextResponse.json({ 
         success: true,
@@ -227,67 +224,62 @@ export async function GET(req){
     }
 
     // Format the reports
-    // Replace lines 217-247 (the formattedReports mapping):
-
-// Format the reports
-const formattedReports = answers.map(answer => {
-  let evaluationReport = answer.evaluationReport;
-  
-  if (typeof evaluationReport === 'string') {
-    try {
-      evaluationReport = JSON.parse(evaluationReport);
-    } catch (e) {
-      console.error('Error parsing evaluation report:', e);
-      evaluationReport = {
-        question: "Error loading question",
-        expectedAnswer: "Error loading expected answer",
-        userAnswer: answer.answerText,
-        technicalAccuracy: 0,
-        completeness: 0,
-        clarity: 0,
-        relevance: 0,
-        totalScore: 0,
-        feedback: "Error loading evaluation",
-        suggestions: []
-      };
-    }
-  }
-  
-  // Ensure suggestions is always an array of strings
-  let suggestions = evaluationReport.suggestions || [];
-  if (!Array.isArray(suggestions)) {
-    suggestions = [String(suggestions)];
-  } else {
-    // Convert each suggestion to string if it's an object
-    suggestions = suggestions.map(s => {
-      if (typeof s === 'object' && s !== null) {
-        // If suggestion is an object with 'suggestion' or 'example' keys
-        return s.suggestion || s.example || JSON.stringify(s);
+    const formattedReports = answers.map(answer => {
+      let evaluationReport = answer.evaluationReport;
+      
+      if (typeof evaluationReport === 'string') {
+        try {
+          evaluationReport = JSON.parse(evaluationReport);
+        } catch (e) {
+          console.error('Error parsing evaluation report:', e);
+          evaluationReport = {
+            question: "Error loading question",
+            expectedAnswer: "Error loading expected answer",
+            userAnswer: answer.answerText,
+            technicalAccuracy: 0,
+            completeness: 0,
+            clarity: 0,
+            relevance: 0,
+            totalScore: 0,
+            feedback: "Error loading evaluation",
+            suggestions: []
+          };
+        }
       }
-      return String(s);
+      
+      // Ensure suggestions is always an array of strings
+      let suggestions = evaluationReport.suggestions || [];
+      if (!Array.isArray(suggestions)) {
+        suggestions = [String(suggestions)];
+      } else {
+        suggestions = suggestions.map(s => {
+          if (typeof s === 'object' && s !== null) {
+            return s.suggestion || s.example || JSON.stringify(s);
+          }
+          return String(s);
+        });
+      }
+      
+      return {
+        success: true,
+        evaluation: {
+          question: evaluationReport.question || "Question not available",
+          expectedAnswer: evaluationReport.expectedAnswer || "Expected answer not available",
+          userAnswer: evaluationReport.userAnswer || answer.answerText,
+          technicalAccuracy: evaluationReport.technicalAccuracy || 0,
+          completeness: evaluationReport.completeness || 0,
+          clarity: evaluationReport.clarity || 0,
+          relevance: evaluationReport.relevance || 0,
+          totalScore: evaluationReport.totalScore || answer.evaluationScore || 0,
+          feedback: evaluationReport.feedback || "No feedback available",
+          suggestions: suggestions
+        },
+        score: answer.evaluationScore || 0,
+        questionIndex: parseInt(answer.questionIndex),
+        answerId: answer.id,
+        createdAt: answer.createdAt
+      };
     });
-  }
-  
-  return {
-    success: true,
-    evaluation: {
-      question: evaluationReport.question || "Question not available",
-      expectedAnswer: evaluationReport.expectedAnswer || "Expected answer not available",
-      userAnswer: evaluationReport.userAnswer || answer.answerText,
-      technicalAccuracy: evaluationReport.technicalAccuracy || 0,
-      completeness: evaluationReport.completeness || 0,
-      clarity: evaluationReport.clarity || 0,
-      relevance: evaluationReport.relevance || 0,
-      totalScore: evaluationReport.totalScore || answer.evaluationScore || 0,
-      feedback: evaluationReport.feedback || "No feedback available",
-      suggestions: suggestions // Now guaranteed to be string array
-    },
-    score: answer.evaluationScore || 0,
-    questionIndex: parseInt(answer.questionIndex),
-    answerId: answer.id,
-    createdAt: answer.createdAt
-  };
-});
 
     const totalScore = formattedReports.reduce((sum, report) => sum + (report.score || 0), 0);
     const averageScore = formattedReports.length > 0 ? Math.round(totalScore / formattedReports.length) : 0;
