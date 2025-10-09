@@ -3,12 +3,7 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
-  // '/api/(.*)',
   '/',
-])
-
-const isProtectedApiRoute = createRouteMatcher([
-  '/api/answers(.*)',
 ])
 
 export default clerkMiddleware(async (auth, req) => {
@@ -16,21 +11,13 @@ export default clerkMiddleware(async (auth, req) => {
   
   console.log('🔍 Middleware checking:', pathname);
 
-  // Protect specific API routes that need authentication
-  if (isProtectedApiRoute(req)) {
-    console.log('🔒 Protecting API route:', pathname);
-    await auth.protect();
-    console.log('✅ User authenticated for:', pathname);
-    return;
-  }
-
   // If it's a public route, allow it without auth
   if (isPublicRoute(req)) {
     console.log('✅ Public route allowed');
     return;
   }
 
-  // For all other protected routes, protect them
+  // For all protected routes (including API routes), protect them
   console.log('🔒 Protecting route');
   await auth.protect();
   console.log('✅ User authenticated for:', pathname);
