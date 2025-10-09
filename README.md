@@ -1,4 +1,4 @@
-<img width="1899" height="970" alt="image" src="https://github.com/user-attachments/assets/be19e7f4-2dde-4260-8f3a-6f2c478cb7d6" /><div align="center">
+
 
 # 🎯 AI Interview Mocker
 
