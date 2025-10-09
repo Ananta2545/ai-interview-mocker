@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { Mic, Maximize, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuestionIndex, setAllowFullscreenExit }) => {
+const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuestionIndex }) => {
   const [saving, setSaving] = useState(false);
   const [time, setTime] = useState(50);
   const timerRef = useRef(null);
@@ -30,7 +30,7 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
     );
   }
 
-  // Full screen monitoring
+  // Full screen monitoring - only check during active recording
   useEffect(() => {
     const checkFullScreen = () => {
       const isCurrentlyFullScreen = !!(
@@ -42,7 +42,7 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
       
       setIsFullScreen(isCurrentlyFullScreen);
       
-      // If not in fullscreen and interview is running, show warning
+      // If not in fullscreen and interview is running (listening), show warning
       if (!isCurrentlyFullScreen && isListening) {
         setFullScreenWarnings(prev => {
           const newCount = prev + 1;
@@ -51,7 +51,13 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
             toast.error("You've exited fullscreen 3 times. Redirecting to dashboard for security reasons.", {
               duration: 5000
             });
-            handleStop();
+            // Stop recording manually instead of calling handleStop
+            SpeechRecognition.stopListening();
+            clearInterval(timerRef.current);
+            setIsListening(false);
+            setIsSpeaking(false);
+            setTime(50);
+            
             setTimeout(() => {
               router.push('/dashboard');
             }, 2000);
@@ -137,46 +143,33 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
   };
 
   const handleStart = useCallback(() => {
-    // Request fullscreen before starting
-    requestFullScreen();
-    setFullScreenWarnings(0); // Reset warnings when starting new session
-    
-    // Small delay to allow fullscreen to activate
-    setTimeout(() => {
+    // Only request fullscreen on first start (when not already in fullscreen)
+    if (!document.fullscreenElement && !isListening) {
+      requestFullScreen();
+      setFullScreenWarnings(0); // Reset warnings when starting new session
+      
+      // Small delay to allow fullscreen to activate
+      setTimeout(() => {
+        SpeechRecognition.startListening({ continuous: true, interimResults: true, language: "en-IN" });
+        setIsListening(true);
+      }, 500);
+    } else {
+      // If already in fullscreen, just start listening
       SpeechRecognition.startListening({ continuous: true, interimResults: true, language: "en-IN" });
       setIsListening(true);
-    }, 500);
-  }, [requestFullScreen]);
+    }
+  }, [requestFullScreen, isListening]);
 
   const handleStop = useCallback(() => {
-    // Allow fullscreen exit without counting as violation
-    if (setAllowFullscreenExit) {
-      setAllowFullscreenExit(true);
-    }
-    
+    // Stop listening and reset timer without exiting fullscreen
     SpeechRecognition.stopListening();
     clearInterval(timerRef.current);
     setIsListening(false);
     setIsSpeaking(false);
+    setTime(50); // Reset timer to 50 seconds
     
-    // Exit fullscreen when stopping
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.msExitFullscreen) {
-      document.msExitFullscreen();
-    }
-    
-    // Reset flag after a short delay
-    setTimeout(() => {
-      if (setAllowFullscreenExit) {
-        setAllowFullscreenExit(false);
-      }
-    }, 500);
-  }, [setAllowFullscreenExit]);
+    toast.success("Recording stopped. Timer reset to 50 seconds.");
+  }, []);
 
   const handleSave = useCallback(async () => {
     if (!transcript || transcript.trim() === "") {
@@ -185,10 +178,10 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
       return;
     }
 
-    // Allow fullscreen exit without counting as violation
-    if (setAllowFullscreenExit) {
-      setAllowFullscreenExit(true);
-    }
+    // Stop listening when saving
+    SpeechRecognition.stopListening();
+    setIsListening(false);
+    setIsSpeaking(false);
 
     setSaving(true);
     clearInterval(timerRef.current);
@@ -244,8 +237,6 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
       toast.success("Answer saved successfully!");
       resetTranscript();
       setTime(50);
-      setIsListening(false);
-      setIsSpeaking(false);
 
       if (typeof onNextQuestion === "function") {
         onNextQuestion();
@@ -255,14 +246,8 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
       toast.error("Error saving answer. Please try again.");
     } finally {
       setSaving(false);
-      // Reset flag after a short delay
-      setTimeout(() => {
-        if (setAllowFullscreenExit) {
-          setAllowFullscreenExit(false);
-        }
-      }, 500);
     }
-  }, [transcript, interviewId, activeQuestionIndex, userId, onNextQuestion, resetTranscript, setAllowFullscreenExit]);
+  }, [transcript, interviewId, activeQuestionIndex, userId, onNextQuestion, resetTranscript]);
 
   // Reset when question changes
   useEffect(() => {
@@ -273,9 +258,10 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
     setIsListening(false);
     setIsSpeaking(false);
     setFullScreenWarnings(0); // Reset warnings for new question
+    // Stay in fullscreen when moving to next question
   }, [activeQuestionIndex, resetTranscript]);
 
-  // Cleanup on unmount ONLY
+  // Cleanup on unmount ONLY - exit fullscreen when leaving the interview page
   useEffect(() => {
     return () => {
       clearInterval(timerRef.current);
@@ -283,9 +269,17 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
       if (fullScreenCheckIntervalRef.current) {
         clearInterval(fullScreenCheckIntervalRef.current);
       }
-      // Exit fullscreen on unmount
-      if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
+      // Exit fullscreen on unmount (when leaving interview page)
+      if (document.fullscreenElement) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
       }
     };
   }, []); // Empty dependency array - only runs on mount/unmount
@@ -325,14 +319,24 @@ const RecordAnswerSection = ({ interviewId, onNextQuestion, userId, activeQuesti
         {!isListening ? (
           <Button
             onClick={handleStart}
-            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white hover:shadow-green-500/40 cursor-pointer px-6 py-3 rounded-xl font-semibold shadow-lg transition-all duration-300"
+            disabled={saving}
+            className={`px-6 py-3 rounded-xl font-semibold shadow-lg transition-all duration-300 ${
+              saving 
+                ? "bg-gray-400 cursor-not-allowed text-white" 
+                : "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white hover:shadow-green-500/40 cursor-pointer"
+            }`}
           >
             Start Speaking
           </Button>
         ) : (
           <Button
             onClick={handleStop}
-            className="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-red-500/40 transition-all duration-300 cursor-pointer"
+            disabled={saving}
+            className={`px-6 py-3 rounded-xl font-semibold shadow-lg transition-all duration-300 ${
+              saving 
+                ? "bg-gray-400 cursor-not-allowed text-white" 
+                : "bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white hover:shadow-red-500/40 cursor-pointer"
+            }`}
           >
             ⏹️ Stop
           </Button>

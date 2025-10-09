@@ -58,7 +58,7 @@ const StartInterview = ({params}) => {
           // Only show warning if:
           // 1. They were in fullscreen and then exited
           // 2. It's not the initial page load
-          // 3. It's not a legitimate action (stop, save, submit)
+          // 3. It's not when completing all questions (allowFullscreenExit is true)
           if (wasInFullscreen && !isInFullscreen && !isInitialLoad && !allowFullscreenExit) {
             const newCount = fullscreenExitCount + 1;
             setFullscreenExitCount(newCount);
@@ -173,7 +173,6 @@ const StartInterview = ({params}) => {
               onNextQuestion={handleNextQuestion} 
               userId={interviewData?.userId} 
               activeQuestionIndex={activeQuestionIndex}
-              setAllowFullscreenExit={setAllowFullscreenExit}
             />
         </div>
     </div>
