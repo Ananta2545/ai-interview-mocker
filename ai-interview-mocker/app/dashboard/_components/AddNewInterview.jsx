@@ -109,17 +109,17 @@ const AddNewInterview = () => {
     <div>
       {/* Card that opens the dialog */}
       <div
-        className="p-10 border rounded-lg bg-secondary hover:scale-105 duration-300 cursor-pointer hover:shadow-md"
+        className="p-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 hover:scale-105 duration-300 cursor-pointer hover:shadow-lg dark:hover:shadow-2xl transition-all"
         onClick={() => setOpenDialog(true)}
       >
-        <h2 className="text-lg text-center">+ Add New</h2>
+        <h2 className="text-lg text-center text-gray-800 dark:text-gray-200 font-medium transition-colors duration-300">+ Add New</h2>
       </div>
 
       {/* Dialog starts here */}
       <Dialog open={openDialog}>
-        <DialogContent className="bg-white rounded-2xl p-8 sm:p-10 shadow-2xl w-full max-w-2xl animate-fade-in scale-in duration-500">
+        <DialogContent className="bg-white dark:bg-gray-800 rounded-2xl p-8 sm:p-10 shadow-2xl dark:shadow-2xl dark:border dark:border-gray-700 w-full max-w-2xl animate-fade-in scale-in duration-500 transition-colors">
             <DialogHeader>
-            <DialogTitle className="text-3xl font-extrabold text-purple-700 mb-4 text-center sm:text-left">
+            <DialogTitle className="text-3xl font-extrabold text-purple-700 dark:text-purple-400 mb-4 text-center sm:text-left transition-colors duration-300">
                 Tell us more about your job interviewing
             </DialogTitle>
 
@@ -127,17 +127,17 @@ const AddNewInterview = () => {
 
             {/* Error message display */}
             {error && (
-              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg transition-colors duration-300">
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">❌</span>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-red-800 mb-1">Error</p>
-                    <p className="text-sm text-red-700">{error}</p>
+                    <p className="text-sm font-semibold text-red-800 dark:text-red-300 mb-1 transition-colors duration-300">Error</p>
+                    <p className="text-sm text-red-700 dark:text-red-400 transition-colors duration-300">{error}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setError(null)}
-                    className="text-red-400 hover:text-red-600 transition-colors"
+                    className="text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors"
                   >
                     ✕
                   </button>
@@ -145,42 +145,42 @@ const AddNewInterview = () => {
               </div>
             )}
             
-                <div className="text-gray-700 space-y-6">
+                <div className="text-gray-700 dark:text-gray-300 space-y-6 transition-colors duration-300">
                     {/* Job details section */}
                     <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-900">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 transition-colors duration-300">
                         Add details about your job position/role, Job description, and years of experience
                     </h2>
 
                     <div className="flex flex-col gap-4 mt-4">
                         {/* Job Role / Position */}
                         <div className="flex flex-col">
-                        <label className="mb-1 font-medium text-gray-700">
+                        <label className="mb-1 font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">
                             Job Role / Job Position
                         </label>
                         <Input
                             placeholder="Ex. Full Stack Developer"
                             required
-                            className="border-gray-300 focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
+                            className="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-purple-500 dark:focus:border-purple-400 focus:ring-purple-500 dark:focus:ring-purple-400 transition-all duration-300"
                             onChange={(event)=>setJobPosition(event.target.value)}
                         />
                         </div>
 
                         {/* You can add more fields like Job Description or Experience here */}
                         <div className="flex flex-col">
-                        <label className="mb-1 font-medium text-gray-700">
+                        <label className="mb-1 font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">
                             Job Description(in short)
                         </label>
                         <Textarea
                             required
                             placeholder="Ex. React, Node.js, MongoDB, etc."
-                            className="border-gray-300 focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
+                            className="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-purple-500 dark:focus:border-purple-400 focus:ring-purple-500 dark:focus:ring-purple-400 transition-all duration-300"
                             onChange={(event)=>setJobDesc(event.target.value)}
                         />
                         </div>
 
                         <div className="flex flex-col">
-                        <label className="mb-1 font-medium text-gray-700">
+                        <label className="mb-1 font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300">
                             Years of Experience
                         </label>
                         <Input
@@ -188,7 +188,7 @@ const AddNewInterview = () => {
                             placeholder="Ex. 2 Years"
                             type="number"
                             max={100}
-                            className="border-gray-300 focus:border-purple-500 focus:ring-purple-500 transition-all duration-300"
+                            className="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-purple-500 dark:focus:border-purple-400 focus:ring-purple-500 dark:focus:ring-purple-400 transition-all duration-300"
                             onChange={(event)=>setJobExperiance(event.target.value)}
                         />
                         </div>
@@ -200,12 +200,12 @@ const AddNewInterview = () => {
                     <Button
                         type="button"
                         variant="ghost"
-                        className="text-gray-700 hover:text-white hover:bg-gray-500 transition-colors duration-300 cursor-pointer"
+                        className="text-gray-700 dark:text-gray-300 hover:text-white hover:bg-gray-500 dark:hover:bg-gray-600 transition-colors duration-300 cursor-pointer"
                         onClick={() => setOpenDialog(false)}
                     >
                         Cancel
                     </Button>
-                    <Button type="submit" disabled={loading} className="bg-purple-600 hover:bg-purple-700 text-white transition-all duration-300 cursor-pointer">
+                    <Button type="submit" disabled={loading} className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white transition-all duration-300 cursor-pointer">
                         {loading? 
                         <>
                         <LoaderCircle className="animate-spin mr-2"/>

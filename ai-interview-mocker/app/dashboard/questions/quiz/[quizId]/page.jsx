@@ -187,8 +187,8 @@ const QuizPage = ({ params }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center transition-colors duration-300">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 transition-colors duration-300"></div>
       </div>
     );
   }
@@ -196,9 +196,9 @@ const QuizPage = ({ params }) => {
   // Fix: Check if user is authenticated
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center transition-colors duration-300">
         <div className="text-center">
-          <p className="text-red-600 mb-4">Please sign in to take the quiz</p>
+          <p className="text-red-600 dark:text-red-400 mb-4 transition-colors duration-300">Please sign in to take the quiz</p>
           <Button onClick={() => router.push('/sign-in')}>
             Sign In
           </Button>
@@ -214,15 +214,15 @@ const QuizPage = ({ params }) => {
   const currentQ = quiz.questions[currentQuestion];
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="max-w-4xl mx-auto p-4 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
       {/* Header */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
             Question {currentQuestion + 1} of {quiz.questions.length}
           </h1>
           <div className="flex items-center space-x-4">
-            <div className="flex items-center text-lg font-semibold">
+            <div className="flex items-center text-lg font-semibold text-gray-900 dark:text-white transition-colors duration-300">
               <Clock className="w-5 h-5 mr-2" />
               {timeLeft}s
             </div>
@@ -232,27 +232,27 @@ const QuizPage = ({ params }) => {
       </div>
 
       {/* Question Card */}
-      <Card className="mb-6">
+      <Card className="mb-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-lg dark:shadow-2xl transition-all duration-300">
         <CardContent className="p-8">
-          <h2 className="text-xl font-semibold mb-6">{currentQ.questionText}</h2>
+          <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-white transition-colors duration-300">{currentQ.questionText}</h2>
 
           <div className="space-y-3">
             {currentQ.options.map((option, index) => {
               let buttonClass =
-                "w-full p-4 text-left border-2 rounded-lg transition-all ";
+                "w-full p-4 text-left border-2 rounded-lg transition-all duration-300 ";
 
               if (selectedOption === null) {
                 buttonClass +=
-                  "border-gray-200 hover:border-blue-300 hover:bg-blue-50";
+                  "border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:shadow-md dark:hover:shadow-lg hover:scale-[1.02]";
               } else if (option === currentQ.correctAnswer) {
-                buttonClass += "border-green-500 bg-green-50 text-green-800";
+                buttonClass += "border-green-500 dark:border-green-600 bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-300";
               } else if (
                 selectedOption === index &&
                 currentQ.options[selectedOption] !== currentQ.correctAnswer
               ) {
-                buttonClass += "border-red-500 bg-red-50 text-red-800";
+                buttonClass += "border-red-500 dark:border-red-600 bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-300";
               } else {
-                buttonClass += "border-gray-200 bg-gray-50";
+                buttonClass += "border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-400";
               }
 
               return (
@@ -263,13 +263,13 @@ const QuizPage = ({ params }) => {
                   className={buttonClass}
                 >
                   <div className="flex items-center justify-between">
-                    <span>{option}</span>
+                    <span className="font-medium">{option}</span>
                     {selectedOption !== null &&
                       (option === currentQ.correctAnswer ? (
-                        <CheckCircle className="w-6 h-6 text-green-600" />
+                        <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400 transition-colors duration-300" />
                       ) : selectedOption === index &&
                         currentQ.options[selectedOption] !== currentQ.correctAnswer ? (
-                        <XCircle className="w-6 h-6 text-red-600" />
+                        <XCircle className="w-6 h-6 text-red-600 dark:text-red-400 transition-colors duration-300" />
                       ) : null)}
                   </div>
                 </button>
@@ -285,7 +285,7 @@ const QuizPage = ({ params }) => {
           <Button
             variant="outline"
             onClick={handleSkip}
-            className="border-orange-300 text-orange-600 hover:bg-orange-50"
+            className="border-orange-300 dark:border-orange-600 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-all duration-300 cursor-pointer"
           >
             <SkipForwardIcon className="w-4 h-4 mr-2" />
             Skip Question
@@ -296,12 +296,12 @@ const QuizPage = ({ params }) => {
       {/* Submission Loading Overlay */}
       {submitting && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-300">
-            <Loader2 className="w-16 h-16 animate-spin text-blue-600 mx-auto mb-4" />
-            <p className="text-xl font-semibold text-center text-gray-800">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-300 border border-gray-200 dark:border-gray-700 transition-colors">
+            <Loader2 className="w-16 h-16 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-4 transition-colors duration-300" />
+            <p className="text-xl font-semibold text-center text-gray-800 dark:text-gray-200 transition-colors duration-300">
               Submitting your answers...
             </p>
-            <p className="text-sm text-gray-500 text-center mt-2">
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-2 transition-colors duration-300">
               Please wait while we process your quiz
             </p>
           </div>

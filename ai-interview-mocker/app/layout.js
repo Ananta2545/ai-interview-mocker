@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "react-hot-toast";
+import { ThemeProvider } from "./context/ThemeContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,18 +20,26 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  return (
-    <>
-      <ClerkProvider>
-      <Toaster position="top-right" reverseOrder={false}/>
-        <html lang="en">
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-            >
+  return (  
+    <html lang="en" className="scroll-smooth">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300`}>
+        <ClerkProvider>
+          <ThemeProvider>
+            <Toaster 
+              position="top-right" 
+              reverseOrder={false}
+              toastOptions={{
+                className: 'dark:bg-gray-800 dark:text-white',
+                style: {
+                  background: 'var(--background)',
+                  color: 'var(--foreground)',
+                },
+              }}
+            />
             {children}
-          </body>
-        </html>
-      </ClerkProvider>
-    </>
+          </ThemeProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }

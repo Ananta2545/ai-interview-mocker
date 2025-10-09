@@ -14,6 +14,66 @@ export const fetchCache = 'force-no-store';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
+// Use working free models with retry logic
+const GEMINI_MODELS = [
+  'gemini-2.0-flash-exp',      // Latest experimental - very fast and free
+  'gemini-1.5-flash-latest',   // Latest stable flash - fast and reliable
+  'gemini-1.5-pro-latest',     // Latest stable pro - better quality
+  'gemini-exp-1206',           // Experimental model - good fallback
+  'gemini-2.5-pro',
+];
+
+/**
+ * Retry evaluation with multiple models
+ */
+async function evaluateWithRetry(evaluationPrompt, maxRetries = GEMINI_MODELS.length) {
+  let lastError = null;
+  
+  for (let i = 0; i < Math.min(maxRetries, GEMINI_MODELS.length); i++) {
+    const model = GEMINI_MODELS[i];
+    
+    try {
+      console.log(`🔄 Evaluating with model: ${model} (attempt ${i + 1}/${maxRetries})`);
+      
+      const response = await Promise.race([
+        ai.models.generateContent({
+          model: model,
+          contents: evaluationPrompt
+        }),
+        // Timeout after 20 seconds (evaluation takes longer)
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), 20000)
+        )
+      ]);
+
+      let content = response?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      content = content.replace(/```json|```/g, '').trim();
+      const evaluation = JSON.parse(content);
+      
+      console.log(`✅ Evaluation success with model: ${model}`);
+      return evaluation;
+      
+    } catch (error) {
+      const errorMsg = error.message || JSON.stringify(error);
+      console.error(`❌ Evaluation failed with ${model}:`, errorMsg);
+      lastError = error;
+      
+      if (errorMsg.includes('429') || errorMsg.includes('RESOURCE_EXHAUSTED')) {
+        console.log(`⚠️ Quota exceeded for ${model}, trying next model...`);
+      }
+      
+      if (i < Math.min(maxRetries, GEMINI_MODELS.length) - 1) {
+        console.log(`🔄 Retrying evaluation with next model...`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+        continue;
+      }
+    }
+  }
+  
+  // All models failed - return fallback evaluation
+  throw lastError || new Error('All models failed');
+}
+
 export async function POST(req) {
   try {
     const { userId, interviewId, questionIndex, answerText, transcript } = await req.json();
@@ -79,24 +139,17 @@ Return JSON ONLY in this exact structure:
 
     let evaluation;
     try {
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash-exp',
-        contents: evaluationPrompt
-      });
-
-      let content = response?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      content = content.replace(/```json|```/g, '').trim();
-      evaluation = JSON.parse(content);
+      evaluation = await evaluateWithRetry(evaluationPrompt);
     } catch (err) {
-      console.error('AI evaluation error:', err);
+      console.error('❌ AI evaluation error (all models failed):', err.message || err);
       evaluation = {
         technicalAccuracy: 10,
         completeness: 10,
         clarity: 10,
         relevance: 10,
         totalScore: 40,
-        feedback: "Fallback: Unable to parse evaluation. Manual review required.",
-        suggestions: ["Retry answer evaluation"]
+        feedback: "Fallback: Unable to parse evaluation due to API issues. Your answer has been saved. Manual review may be required.",
+        suggestions: ["Try submitting again", "Check your internet connection", "Contact support if issue persists"]
       };
     }
 

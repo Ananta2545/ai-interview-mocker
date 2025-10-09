@@ -35,14 +35,14 @@ const StepsSection = () => {
   ];
 
   return (
-    <section className="py-20 px-4 bg-white">
+    <section className="py-20 px-4 bg-white dark:bg-gray-900 transition-colors duration-300">
       <div className="mx-auto max-w-7xl">
         {/* Section header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 transition-colors duration-300">
             How It Works
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto transition-colors duration-300">
             Get started in just four simple steps and transform your interview preparation
           </p>
         </div>
@@ -56,11 +56,11 @@ const StepsSection = () => {
             >
               {/* Connection line (hidden on last step) */}
               {index < steps.length - 1 && (
-                <div className="hidden lg:block cursor-pointer absolute top-20 left-1/2 w-full h-0.5 bg-gradient-to-r from-gray-200 to-gray-300 z-0" />
+                <div className="hidden lg:block cursor-pointer absolute top-20 left-1/2 w-full h-0.5 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 z-0 transition-colors duration-300" />
               )}
 
               {/* Step card */}
-              <div className="relative bg-white cursor-pointer rounded-2xl border border-gray-200 p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2 z-10">
+              <div className="relative bg-white dark:bg-gray-800 cursor-pointer rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-lg dark:shadow-2xl hover:shadow-xl dark:hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 z-10">
                 {/* Step number badge */}
                 <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r ${step.gradient} text-white font-bold text-lg mb-4`}>
                   {step.number}
@@ -68,16 +68,16 @@ const StepsSection = () => {
 
                 {/* Icon */}
                 <div className="mb-4">
-                  <step.icon className="w-12 h-12 text-primary" strokeWidth={1.5} />
+                  <step.icon className="w-12 h-12 text-primary dark:text-blue-400 transition-colors duration-300" strokeWidth={1.5} />
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 transition-colors duration-300">
                   {step.title}
                 </h3>
 
                 {/* Description */}
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed transition-colors duration-300">
                   {step.description}
                 </p>
               </div>

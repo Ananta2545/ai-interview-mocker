@@ -9,9 +9,9 @@ const CTASection = () => {
   const router = useRouter();
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-primary/5 via-purple-50/30 to-blue-50/30">
+    <section className="py-20 px-4 bg-gradient-to-br from-primary/5 via-purple-50/30 to-blue-50/30 dark:from-primary/10 dark:via-purple-900/20 dark:to-blue-900/20 transition-colors duration-300">
       <div className="mx-auto max-w-4xl">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary to-purple-600 p-12 md:p-16 shadow-2xl">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary to-purple-600 dark:from-blue-600 dark:to-purple-700 p-12 md:p-16 shadow-2xl transition-colors duration-300">
           {/* Background decoration */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
@@ -40,7 +40,7 @@ const CTASection = () => {
               <Button
                 size="lg"
                 onClick={() => router.push('/dashboard')}
-                className="bg-white text-primary hover:bg-gray-100 font-semibold px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                className="bg-white text-primary hover:bg-gray-100 dark:bg-gray-100 dark:text-blue-600 dark:hover:bg-white font-semibold px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
               >
                 Get Started Free
                 <ArrowRight className="ml-2" size={20} />
@@ -50,7 +50,7 @@ const CTASection = () => {
                 size="lg"
                 variant="outline"
                 onClick={() => router.push('/dashboard')}
-                className="border-2 border-white text-black hover:bg-white hover:text-primary font-semibold px-8 py-6 text-lg rounded-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                className="border-2 border-white text-white hover:bg-white hover:text-primary dark:hover:text-blue-600 font-semibold px-8 py-6 text-lg rounded-xl transition-all duration-300 hover:scale-105 cursor-pointer"
               >
                 View Demo
               </Button>

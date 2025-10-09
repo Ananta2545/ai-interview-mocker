@@ -99,8 +99,22 @@ const StartInterview = ({params}) => {
         });
       };
       
-        if (loading) return <p>Loading...</p>;
-        if (error) return <p className="text-red-600">{error}</p>;
+        if (loading) return (
+          <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+              <p className="text-lg font-medium text-gray-900 dark:text-white transition-colors duration-300">Loading interview...</p>
+            </div>
+          </div>
+        );
+        
+        if (error) return (
+          <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-pink-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+            <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl dark:shadow-2xl border border-gray-200 dark:border-gray-700 transition-all duration-300">
+              <p className="text-red-600 dark:text-red-400 font-semibold text-lg transition-colors duration-300">{error}</p>
+            </div>
+          </div>
+        );
 
       const handleNextQuestion = ()=>{
         setActiveQuestionIndex((prevIndex)=>{
@@ -122,9 +136,9 @@ const StartInterview = ({params}) => {
 
       if (evaluating) {
         return (
-          <div className="flex flex-col items-center justify-center h-screen">
+          <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
             <div className="loader mb-4"></div>
-            <p className="text-lg font-semibold text-gray-700">
+            <p className="text-lg font-semibold text-gray-700 dark:text-gray-300 transition-colors duration-300">
               Evaluating your answers...
             </p>
           </div>
@@ -133,27 +147,27 @@ const StartInterview = ({params}) => {
 
 
   return (
-    <div className='p-10'>
+    <div className='p-6 md:p-10 min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300'>
         {/* Fullscreen Warning Modal */}
         {showFullscreenWarning && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl border-4 border-red-500 animate-pulse">
+          <div className="fixed inset-0 bg-black/80 dark:bg-black/90 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 max-w-md mx-4 shadow-2xl border-4 border-red-500 dark:border-red-600 animate-pulse transition-all duration-300">
               <div className="flex flex-col items-center text-center">
-                <div className="bg-red-500 p-4 rounded-full mb-4">
+                <div className="bg-red-500 dark:bg-red-600 p-4 rounded-full mb-4 transition-colors duration-300">
                   <Maximize className="w-12 h-12 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3 transition-colors duration-300">
                   ⚠️ Fullscreen Mode Required!
                 </h2>
-                <p className="text-gray-700 mb-2">
-                  You have exited fullscreen mode <span className="font-bold text-red-600">{fullscreenExitCount} time(s)</span>.
+                <p className="text-gray-700 dark:text-gray-300 mb-2 transition-colors duration-300">
+                  You have exited fullscreen mode <span className="font-bold text-red-600 dark:text-red-400">{fullscreenExitCount} time(s)</span>.
                 </p>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-600 dark:text-gray-400 mb-6 transition-colors duration-300">
                   For security and proctoring purposes, you must remain in fullscreen mode during the interview.
                 </p>
                 <Button
                   onClick={handleReEnterFullscreen}
-                  className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="bg-gradient-to-r from-red-500 to-orange-500 dark:from-red-600 dark:to-orange-600 hover:from-red-600 hover:to-orange-600 dark:hover:from-red-700 dark:hover:to-orange-700 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                 >
                   <Maximize className="w-5 h-5 mr-2" />
                   Re-Enter Fullscreen Now
@@ -163,7 +177,7 @@ const StartInterview = ({params}) => {
           </div>
         )}
 
-        <div className='grid grid-cols-1 md:grid-cols-2'>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
             {/* Questions */}
             <QuestionSection mockInterviewQuestion={mockInterviewQuestion} activeQuestionIndex={activeQuestionIndex}/>
 

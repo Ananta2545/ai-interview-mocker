@@ -13,7 +13,7 @@ export const metadata = {
 
 const HowItWorksPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
       <Header />
       <HeroSection />
       <StepsSection />

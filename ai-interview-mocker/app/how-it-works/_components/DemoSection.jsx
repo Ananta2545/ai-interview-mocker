@@ -1,8 +1,11 @@
 "use client";
 
-import { Play, CheckCircle } from 'lucide-react';
+import { Play, CheckCircle, X } from 'lucide-react';
+import { useState } from 'react';
 
 const DemoSection = () => {
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+
   const highlights = [
     'AI generates realistic interview questions',
     'Record answers via text or voice input',
@@ -12,17 +15,34 @@ const DemoSection = () => {
     'Prepare for any role or industry',
   ];
 
+  const handleVideoClick = () => {
+    setIsVideoOpen(true);
+  };
+
+  const handleCloseVideo = () => {
+    setIsVideoOpen(false);
+  };
+
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      handleCloseVideo();
+    }
+  };
+
   return (
-    <section className="py-20 px-4 bg-white">
+    <section className="py-20 px-4 bg-white dark:bg-gray-900 transition-colors duration-300">
       <div className="mx-auto max-w-7xl">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left: Demo video placeholder */}
           <div className="relative group">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-primary/20 to-purple-500/20 aspect-video">
+            <div 
+              onClick={handleVideoClick}
+              className="relative rounded-2xl overflow-hidden shadow-2xl dark:shadow-2xl bg-gradient-to-br from-primary/20 to-purple-500/20 dark:from-primary/30 dark:to-purple-600/30 aspect-video cursor-pointer transition-all duration-300"
+            >
               {/* Video placeholder */}
-              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary to-purple-600">
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary to-purple-600 dark:from-blue-600 dark:to-purple-700 transition-colors duration-300">
                 <div className="text-center">
-                  <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300 cursor-pointer">
+                  <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mx-auto mb-4 group-hover:scale-110 group-hover:bg-white/30 transition-all duration-300 cursor-pointer">
                     <Play className="w-10 h-10 text-white ml-1" fill="white" />
                   </div>
                   <p className="text-white font-semibold text-lg">Watch Demo</p>
@@ -35,14 +55,14 @@ const DemoSection = () => {
             </div>
 
             {/* Floating stats */}
-            <div className="absolute -bottom-6 -right-6 bg-white rounded-xl shadow-xl p-4 border border-gray-200">
+            <div className="absolute -bottom-6 -right-6 bg-white dark:bg-gray-800 rounded-xl shadow-xl dark:shadow-2xl p-4 border border-gray-200 dark:border-gray-700 transition-all duration-300">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 dark:from-green-600 dark:to-emerald-600 flex items-center justify-center transition-colors duration-300">
                   <CheckCircle className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-gray-900">95%</div>
-                  <div className="text-sm text-gray-600">Success Rate</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">95%</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 transition-colors duration-300">Success Rate</div>
                 </div>
               </div>
             </div>
@@ -50,10 +70,10 @@ const DemoSection = () => {
 
           {/* Right: Content */}
           <div>
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 transition-colors duration-300">
               See It In Action
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 transition-colors duration-300">
               Experience the power of AI-driven interview preparation. Our platform simulates 
               real interview scenarios and provides comprehensive feedback to help you improve.
             </p>
@@ -62,16 +82,48 @@ const DemoSection = () => {
             <ul className="space-y-4">
               {highlights.map((highlight, index) => (
                 <li key={index} className="flex items-start gap-3">
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-r from-primary to-purple-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-r from-primary to-purple-600 dark:from-blue-500 dark:to-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors duration-300">
                     <CheckCircle className="w-4 h-4 text-white" strokeWidth={3} />
                   </div>
-                  <span className="text-gray-700">{highlight}</span>
+                  <span className="text-gray-700 dark:text-gray-300 transition-colors duration-300">{highlight}</span>
                 </li>
               ))}
             </ul>
           </div>
         </div>
       </div>
+
+      {/* Video Modal */}
+      {isVideoOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 dark:bg-black/90 backdrop-blur-sm transition-all duration-300 p-4"
+          onClick={handleBackdropClick}
+        >
+          <div className="relative w-full max-w-5xl">
+            {/* Close Button */}
+            <button
+              onClick={handleCloseVideo}
+              className="absolute -top-12 right-0 w-10 h-10 rounded-full bg-white/10 dark:bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 dark:hover:bg-white/30 transition-all duration-300 group"
+              aria-label="Close video"
+            >
+              <X className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-300" />
+            </button>
+
+            {/* Video Container */}
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-black aspect-video">
+              <video
+                className="w-full h-full"
+                controls
+                autoPlay
+                src="/interviewMockerVideo.mp4"
+                onEnded={handleCloseVideo}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };

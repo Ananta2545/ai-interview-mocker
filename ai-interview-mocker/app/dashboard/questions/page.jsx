@@ -68,25 +68,25 @@ const QuestionsPage = ()=>{
     }
 
     return(
-        <div className="max-w-2xl mx-auto space-y-8">
+        <div className="max-w-2xl mx-auto space-y-8 p-6">
             <div className="text-center">
-                <h1 className="text-4xl font-bold mb-4">Practice Quiz</h1>
-                <p className="text-gray-600 text-lg">Test your knowledge with custom quizzes</p>
+                <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white transition-colors duration-300">Practice Quiz</h1>
+                <p className="text-gray-600 dark:text-gray-400 text-lg transition-colors duration-300">Test your knowledge with custom quizzes</p>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <h2 className="text-2xl font-semibold text-center">Create Your Quiz</h2>
+            <Card className="shadow-xl dark:shadow-2xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 transition-all duration-300">
+                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-800 rounded-t-lg border-b border-gray-200 dark:border-gray-700 transition-all duration-300">
+                    <h2 className="text-2xl font-semibold text-center text-gray-900 dark:text-white transition-colors duration-300">Create Your Quiz</h2>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* topic input */}
                         <div>
-                            <label className="block text-sm font-medium mb-2">Topic</label>
+                            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white transition-colors duration-300">Topic</label>
                             <input type="text" value={formData.topic}
                                 onChange={(e)=>{setFormData({...formData, topic: e.target.value})}}
                                 placeholder="e.g., JavaScript"
-                                className="w-full border border-gray-300 rounded-lg p-2"
+                                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                                 required
                              />
                         </div>
@@ -94,48 +94,48 @@ const QuestionsPage = ()=>{
 
                         {/* Difficulty input */}
                         <div>
-                            <label className="block text-sm font-medium mb-2">Difficulty Level</label>
+                            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white transition-colors duration-300">Difficulty Level</label>
                             <input
                                 type="text"
                                 value={formData.difficulty}
                                 onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
                                 placeholder="easy, medium, hard"
-                                className="w-full border border-gray-300 rounded-lg p-2"
+                                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                                 required
                             />
                         </div>
 
                         {/* Number of questions input */}
                         <div>
-                            <label className="block text-sm font-medium mb-2">Number of Questions</label>
+                            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white transition-colors duration-300">Number of Questions</label>
                             <input
                                 type="number"
                                 value={formData.questionCount}
                                 onChange={(e) => setFormData({ ...formData, questionCount: parseInt(e.target.value) })}
                                 min={1}
                                 max={50}
-                                className="w-full border border-gray-300 rounded-lg p-2"
+                                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                                 required
                             />
                         </div>
 
                         {/* Time Limit Input */}
                         <div>
-                            <label className="block text-sm font-medium mb-2">Time per Question (seconds)</label>
+                            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white transition-colors duration-300">Time per Question (seconds)</label>
                             <input
                                 type="number"
                                 value={formData.timeLimit}
                                 onChange={(e) => setFormData({ ...formData, timeLimit: parseInt(e.target.value) })}
                                 min={10}
                                 max={60}
-                                className="w-full border border-gray-300 rounded-lg p-2"
+                                className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent transition-all duration-300"
                                 required
                             />
                         </div>
                         {/* Submit Button */}
                         <Button
                             type="submit"
-                            className="w-full cursor-pointer bg-blue-600 hover:bg-blue-700 text-lg py-3"
+                            className="w-full cursor-pointer bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white text-lg py-3 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                             disabled={!formData.topic || !formData.difficulty || !formData.questionCount || loading}
                             >
                             {loading ? 'Generating Quiz...' : 'Start Quiz'}
