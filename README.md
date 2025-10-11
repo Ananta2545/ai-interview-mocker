@@ -12,7 +12,7 @@
 
 **A comprehensive web application that helps you prepare for technical interviews using AI-generated questions, real-time speech recognition, advanced proctoring, and intelligent evaluation powered by Google Gemini AI.**
 
-[🚀 Live Demo](https://your-app.vercel.app) 
+[Live Demo](https://ai-interview-mocker-xi-bice.vercel.app/) 
 
 </div>
 
@@ -32,12 +32,10 @@
 
 
 #### Interview Setup
-![Interview Setup - Dark Mode](./screenshots/dark/interview-setup.png)
 <img width="1919" height="972" alt="image" src="https://github.com/user-attachments/assets/985cd9c1-e3a6-4b40-973c-6afb3e458af2" />
 
 
 #### Active Interview
-![Active Interview - Dark Mode](./screenshots/dark/active-interview.png)
 <img width="1919" height="970" alt="image" src="https://github.com/user-attachments/assets/6701a2d1-ddba-4a20-9623-b4e15b81b1e3" />
 
 
@@ -91,16 +89,11 @@
 
 ### Full Application Walkthrough
 
-<div align="center">
-
 #### Dark Mode Demo
 Will upload soon
 
 #### Light Mode Demo
-
 https://github.com/user-attachments/assets/6d63fcff-b6d9-493a-a6f3-aae405334d0c
-
-</div>
 
 ---
 
@@ -128,7 +121,6 @@ https://github.com/user-attachments/assets/6d63fcff-b6d9-493a-a6f3-aae405334d0c
 - **Webcam Monitoring** - Live video feed with mirror mode
 - **Screen Sharing** - Full monitor validation (no window/tab sharing)
 - **Fullscreen Enforcement** - 3-warning system with auto-redirect
-- **Session Tracking** - Complete audit trail of interview integrity
 - **Status Indicators** - Real-time visual feedback for all requirements
 
 </td>
@@ -141,7 +133,6 @@ https://github.com/user-attachments/assets/6d63fcff-b6d9-493a-a6f3-aae405334d0c
 - **Active Speaking Detection** - Visual feedback when user is speaking
 - **50-Second Timer** - Countdown per question with progress bar
 - **Pause & Resume** - Control recording flow as needed
-- **Answer Preview** - Review transcript before submission
 
 </td>
 <td width="50%">
@@ -179,7 +170,7 @@ https://github.com/user-attachments/assets/6d63fcff-b6d9-493a-a6f3-aae405334d0c
 <td width="33%">
 
 #### 📋 Setup Phase
-- ✅ Webcam preview with mirror mode
+- ✅ Webcam preview
 - ✅ Microphone level testing
 - ✅ Full monitor screen sharing
 - ✅ Real-time status indicators
@@ -197,7 +188,6 @@ https://github.com/user-attachments/assets/6d63fcff-b6d9-493a-a6f3-aae405334d0c
 - ✅ Active speaking detection
 - ✅ Visual recording indicators
 - ✅ Pause/resume capability
-- ✅ Answer preview before save
 
 </td>
 <td width="33%">
@@ -341,143 +331,6 @@ Voice Input → Text → Grammar Fix → AI Score → Feedback
 - AI evaluation feedback
 - Improvement tips
 - Key takeaways
-
----
-
-### 🎯 **Interactive Quiz System**
-
-```
-#### ⚡ Quiz Features
-- **Live Timer**: Countdown per question
-- **Progress Bar**: Visual completion tracking
-- **Instant Feedback**: ✓ Green / ✗ Red
-- **Auto-Progress**: 2-second delay after answer
-- **Skip Option**: Move to next question
-- **Loading States**: Smooth transitions
-- **Responsive Design**: Works on all devices
-- **Score Calculation**: Real-time updates
-
-</td>
-</tr>
-</table>
-
-#### Quiz Flow Diagram
-```
-Create Quiz → Generate Questions → Answer Questions → Submit → View Results
-     ↓               ↓                    ↓              ↓          ↓
-User Input → AI Generation → Timed Q&A → Calculate → Detailed Report
-```
-
-#### Question Types
-- **Multiple Choice**: 4 options, 1 correct answer
-- **Time-Limited**: 10-30 seconds per question
-- **Difficulty-Based**: Easy, Medium, Hard variations
-- **Topic-Specific**: Focused on selected subject
-
-#### Results Analysis
-- **Score Percentage**: Overall performance metric
-- **Correct Count**: Number of right answers
-- **Incorrect Count**: Number of wrong answers
-- **Skipped Count**: Unanswered questions
-- **Time Per Question**: Average response time
-- **Question Review**: Detailed breakdown
-- **Performance Graph**: Visual representation
-- **Retry Option**: Take quiz again
-
----
-
-### 📊 **Dashboard & Analytics**
-
-#### Main Dashboard Features
-- **Interview Cards**: Grid layout with hover effects
-- **Quick Actions**: Start new interview, view results
-- **Recent Activity**: Timeline of your practice sessions
-- **Statistics**: Total interviews, average score, improvement trend
-- **Quiz History**: Past quizzes with scores and topics
-- **Performance Metrics**: Visual charts and graphs
-
-#### Interview Card Details
-```
-┌─────────────────────────────────┐
-│ 💼 Full Stack Developer         │
-│ 📝 React, Node.js, PostgreSQL   │
-│ ⏱️  3 years experience           │
-│ 📅 Created: Jan 10, 2025        │
-│                                  │
-│ [Start Interview] [View Feedback]│
-└─────────────────────────────────┘
-```
-
-#### Analytics Dashboard
-- **Total Interviews**: Count of completed sessions
-- **Average Score**: Mean performance across all interviews
-- **Best Performance**: Highest score achieved
-- **Improvement Rate**: Progress over time
-- **Category Strengths**: Top-performing areas
-- **Areas to Improve**: Categories needing work
-- **Time Spent**: Total practice time
-- **Consistency**: Interview frequency
-
----
-
-### 🎨 **Dark Mode & Light Mode**
-
-#### Theme Features
-- **Automatic Toggle**: Sun/Moon icon in header
-- **Smooth Transitions**: 300ms color changes
-- **Local Storage**: Preference saved
-- **System Preference**: Auto-detects OS setting
-- **Consistent Design**: All pages themed
-- **Accessible**: WCAG AA compliant colors
-- **No Flash**: Prevents white flash on load
-
-#### Design System
-```css
-/* Light Mode */
-Background: White to Purple-50
-Text: Gray-900
-Accent: Blue-600
-
-/* Dark Mode */
-Background: Gray-900 to Gray-800
-Text: White
-Accent: Blue-400
-```
-
----
-
-## 🚀 Quick Start
-
-### **Prerequisites**
-```bash
-Node.js 18+
-npm or yarn
-PostgreSQL database (Neon recommended)
-API Keys: Clerk, Gemini AI
-```
-
-### **Installation**
-```bash
-# Clone repository
-git clone https://github.com/yourusername/ai-interview-mocker.git
-cd ai-interview-mocker
-
-# Install dependencies
-npm install
-
-# Setup environment variables
-cp .env.example .env.local
-# Edit .env.local with your API keys
-
-# Push database schema
-npx drizzle-kit push
-
-# Start development server
-npm run dev
-```
-
-Visit `http://localhost:3000`
-
 ---
 
 ## 🛠️ Technology Stack
