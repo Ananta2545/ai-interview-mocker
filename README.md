@@ -20,42 +20,6 @@
 
 ## 📸 Screenshots
 
-### 🌙 Dark Mode
-<img width="1903" height="838" alt="image" src="https://github.com/user-attachments/assets/9687397b-07c0-4ac3-9770-e2a9d71112f3" />
-
-
-#### Landing Page
-<img width="1899" height="970" alt="image" src="https://github.com/user-attachments/assets/b8db1cb3-e2af-4797-b6f7-96462c721b37" />
-
-#### Dashboard
-<img width="1919" height="970" alt="image" src="https://github.com/user-attachments/assets/72039423-0f6f-4d10-bb68-3e1e7194df6d" />
-
-
-#### Interview Setup
-<img width="1919" height="972" alt="image" src="https://github.com/user-attachments/assets/985cd9c1-e3a6-4b40-973c-6afb3e458af2" />
-
-
-#### Active Interview
-<img width="1919" height="970" alt="image" src="https://github.com/user-attachments/assets/6701a2d1-ddba-4a20-9623-b4e15b81b1e3" />
-
-
-#### Feedback & Results
-<img width="1919" height="970" alt="image" src="https://github.com/user-attachments/assets/4091f38a-4d14-4cb4-af05-f006047ceabf" />
-
-
-#### Quiz Interface
-<img width="1919" height="968" alt="image" src="https://github.com/user-attachments/assets/1830d9de-6583-4874-82ea-05ecc711941a" />
-<img width="1919" height="968" alt="image" src="https://github.com/user-attachments/assets/a076b856-28c4-4afb-81a7-4fa68ca0bc1a" />
-
-
-
-#### How It Works
-<img width="1919" height="964" alt="image" src="https://github.com/user-attachments/assets/ebe2802c-7284-403a-b573-3cef5e4a7378" />
-
----
-
-### ☀️ Light Mode
-
 #### Landing Page
 <img width="1919" height="970" alt="image" src="https://github.com/user-attachments/assets/74dc4d09-e947-41c1-ad52-623ca37589fe" />
 
