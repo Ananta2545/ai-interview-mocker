@@ -19,6 +19,7 @@ export async function POST(req) {
       return NextResponse.json({error: "Unauthorized please sign in"}, {status: 401})
     }
     console.log("Authenticated user: ", authenticatedUserId);
+    console.log("BODY RECEIVED:", { userId, numQuestions, topic, level, timeLimit });
 
     if (!userId || !numQuestions || !topic || !level || !timeLimit) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -56,8 +57,8 @@ Example format:
     // Retry mechanism with fallback models
     let response;
     let lastError;
-    // Using correct model names for @google/genai package
-    const models = ['gemini-2.0-flash-exp', 'gemini-1.5-flash-latest', 'gemini-1.5-pro-latest'];
+    // Using current Gemini model names from official documentation
+    const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-2.0-flash'];
     
     for (const model of models) {
       try {
@@ -72,9 +73,13 @@ Example format:
         console.error(`Error with ${model}:`, error.message);
         lastError = error;
         
-        // If it's a 503 (overload) or 404 (not found), try next model
-        if (error.status === 503 || error.status === 404 || error.message?.includes('overloaded') || error.message?.includes('not found')) {
-          console.log(`Model ${model} failed, trying next...`);
+        // If it's a 503 (overload), 404 (not found), or 429 (quota exceeded), try next model
+        if (error.status === 503 || error.status === 404 || error.status === 429 || 
+            error.message?.includes('overloaded') || 
+            error.message?.includes('not found') ||
+            error.message?.includes('quota') ||
+            error.message?.includes('RESOURCE_EXHAUSTED')) {
+          console.log(`Model ${model} failed (status: ${error.status}), trying next...`);
           continue;
         }
         

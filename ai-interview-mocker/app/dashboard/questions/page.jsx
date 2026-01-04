@@ -1,6 +1,4 @@
 "use client";
-
-// import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Card, CardContent, CardHeader } from "../../../components/ui/card";
 import {Button} from "../../../components/ui/button";
 import { useUser } from "@clerk/nextjs";
@@ -8,8 +6,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import QuizHistory from "./_components/QuizHistory";
-
-
 
 const QuestionsPage = ()=>{
     const [formData, setFormData] = useState({
@@ -20,13 +16,17 @@ const QuestionsPage = ()=>{
     });
 
     const [loading, setLoading] = useState(false);
-    const {user} = useUser();
+    const {user, isLoaded} = useUser();
     const router = useRouter();
 
     const handleSubmit = async(e)=>{
         e.preventDefault();
+        if(!isLoaded){
+            toast.error("Loading user data...");
+            return;
+        }
         if(!user){
-            toast.error("No user found");
+            toast.error("Please sign in to start a quiz");
             return;
         }
         setLoading(true);

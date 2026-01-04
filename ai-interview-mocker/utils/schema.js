@@ -52,6 +52,7 @@ export const quizAnswers = pgTable("quizAnswers", {
   id: serial("id").primaryKey(),
   userId: varchar("userId", { length: 255 }).notNull(),
   questionId: integer("questionId").notNull().references(() => quizQuestions.id),
+  resultId: integer("resultId").references(() => quizResults.id), // Link to specific quiz attempt
   selectedAnswer: text("selectedAnswer").notNull(),
   isCorrect: integer("isCorrect").notNull(), // 1 = correct, 0 = wrong
   createdAt: timestamp("createdAt", { withTimezone: true }).defaultNow(),

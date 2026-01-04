@@ -22,6 +22,7 @@ import {
   Zap,
   RefreshCw
 } from 'lucide-react';
+import { getAuth } from '@clerk/nextjs/server';
 
 const ResultsPage = ({ params }) => {
   const [results, setResults] = useState(null);
@@ -31,25 +32,33 @@ const ResultsPage = ({ params }) => {
   const router = useRouter();
 
   const unwrappedParams = use(params);
-  const resultId = unwrappedParams.resultId;
+  const quizId = unwrappedParams.resultId;
 
+
+  
   useEffect(() => {
-    if (isLoaded && resultId) {
+    if (isLoaded && quizId) {
       fetchResults();
     }
-  }, [resultId, isLoaded]);
+  }, [params.quizId, isLoaded, user]);
+  console.log("UserId for result page is: ", user)
 
   const fetchResults = async () => {
+    if(!user) return;
+
     try {
       setLoading(true);
       setError(null);
 
-      console.log('🔍 Fetching results for ID:', resultId);
+      // console.log('🔍 Fetching results for ID:', quizId);
 
       const response = await fetch(`/api/quiz/results`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user?.id })
+        body: JSON.stringify({ 
+          userId: user.id,
+          quizId: parseInt(quizId)
+         })
       });
 
       const data = await response.json();

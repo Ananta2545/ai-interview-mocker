@@ -19,8 +19,10 @@ const QuizPage = ({ params }) => {
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
-  const { quizId } = use(params);
+  const unwrappedParams = use(params);
+  const { quizId } = unwrappedParams;
   const {user, isLoaded} = useUser();
+
 
   useEffect(() => {
     if (isLoaded && quizId) {

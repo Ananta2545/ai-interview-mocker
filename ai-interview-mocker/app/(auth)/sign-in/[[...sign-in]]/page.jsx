@@ -1,6 +1,17 @@
 import { SignIn } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
-export default function Page() {
+export default async function Page({searchParams}) {
+  // 🧠 Must be awaited because it's a server-side call
+  const { userId } = await auth();
+
+  // 🚀 Redirect if already signed in BEFORE rendering <SignIn />
+  if (userId) {
+    redirect("/dashboard");
+    return null;
+  }
+
   return (
     <div className="min-h-screen flex relative">
       {/* Left Side - Image (hidden on small screens) */}
@@ -24,7 +35,7 @@ export default function Page() {
       <div className="flex w-full md:w-1/2 items-center justify-center p-8 bg-gray-50 z-10">
         <div className="w-full max-w-md">
           <h2 className="text-3xl font-bold mb-6 text-center">Welcome Back</h2>
-          <SignIn appearance={{ layout: { socialButtonsPlacement: 'bottom' }  }} />
+          <SignIn appearance={{ layout: { socialButtonsPlacement: "bottom" } }} />
         </div>
       </div>
 

@@ -19,6 +19,7 @@ import {
   X
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useUser } from "@clerk/nextjs";
 
 const QuizHistory = () => {
   const [quizzes, setQuizzes] = useState([]);
@@ -27,6 +28,8 @@ const QuizHistory = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [quizToDelete, setQuizToDelete] = useState(null);
   const router = useRouter();
+
+  const {userId} = useUser(); // Get userId from useUser hook
 
   useEffect(() => {
     fetchQuizHistory();
@@ -55,6 +58,7 @@ const QuizHistory = () => {
   };
 
   const handleViewResults = (quizId) => {
+    console.log("Quiz id is: ", quizId)
     router.push(`/dashboard/questions/results/${quizId}`);
   };
 
